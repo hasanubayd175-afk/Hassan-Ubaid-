@@ -24,6 +24,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   CLIENT_SPOTLIGHT_CLIPS,
   ENGINEERING_SERVICE_IDS,
@@ -78,8 +79,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [newsIndex, setNewsIndex] = useState(0);
   const [newsPaused, setNewsPaused] = useState(false);
+  const [hoveredRegionTarget, setHoveredRegionTarget] = useState<string | null>(
+    null
+  );
   const navRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const { language, setLanguage, t } = useLanguage();
 
@@ -229,35 +234,117 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* Top Regional Hubs Utility Bar */}
-      <div className="hidden lg:block bg-[#0E2233] text-slate-200 border-b border-[#132C40]">
+      <div className="hidden lg:block relative z-50 bg-[#0E2233] text-slate-200 border-b border-[#132C40]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-6 text-[11px]">
           <div className="flex items-center gap-5 min-w-0">
             <span className="font-semibold text-white shrink-0">
               {t.nav.regionalHubs}
             </span>
-            {OFFICES.map((office) => (
-              <a
-                key={office.id}
-                href={`tel:${office.phone.replace(/\s+/g, '')}`}
-                className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors whitespace-nowrap"
-              >
-                <MapPin className="w-3 h-3 text-[#2E96D8] shrink-0" />
-                <span>
-                  {office.id === 'germany'
-                    ? t.regions.germany
-                    : office.id === 'dubai'
-                      ? t.regions.dubai
-                      : t.regions.london}
-                  :
-                </span>
-                <span
-                  dir="ltr"
-                  className="font-mono font-semibold text-white tabular-nums"
+            {OFFICES.map((office) => {
+              const targetKey = `link-${office.id}`;
+              const isTipVisible = hoveredRegionTarget === targetKey;
+              const compliance = t.nav.regionCompliance[office.id];
+              const regionFull =
+                office.id === 'germany'
+                  ? t.regions.germanyFull
+                  : office.id === 'dubai'
+                    ? t.regions.dubaiFull
+                    : t.regions.londonFull;
+              const tipId = `nav-compliance-${targetKey}`;
+
+              return (
+                <div
+                  key={office.id}
+                  className="relative"
+                  onMouseEnter={() => setHoveredRegionTarget(targetKey)}
+                  onMouseLeave={() =>
+                    setHoveredRegionTarget((prev) =>
+                      prev === targetKey ? null : prev
+                    )
+                  }
                 >
-                  {office.phone}
-                </span>
-              </a>
-            ))}
+                  <a
+                    href={`tel:${office.phone.replace(/\s+/g, '')}`}
+                    aria-describedby={tipId}
+                    onFocus={() => setHoveredRegionTarget(targetKey)}
+                    onBlur={() =>
+                      setHoveredRegionTarget((prev) =>
+                        prev === targetKey ? null : prev
+                      )
+                    }
+                    className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors whitespace-nowrap py-1"
+                  >
+                    <MapPin className="w-3 h-3 text-[#2E96D8] shrink-0" />
+                    <span>
+                      {office.id === 'germany'
+                        ? t.regions.germany
+                        : office.id === 'dubai'
+                          ? t.regions.dubai
+                          : t.regions.london}
+                      :
+                    </span>
+                    <span
+                      dir="ltr"
+                      className="font-mono font-semibold text-white tabular-nums"
+                    >
+                      {office.phone}
+                    </span>
+                  </a>
+
+                  <AnimatePresence>
+                    {isTipVisible && (
+                      <motion.div
+                        id={tipId}
+                        role="tooltip"
+                        initial={
+                          prefersReducedMotion
+                            ? { opacity: 1 }
+                            : { opacity: 0, y: -4, scale: 0.97 }
+                        }
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={
+                          prefersReducedMotion
+                            ? { opacity: 0 }
+                            : { opacity: 0, y: -4, scale: 0.97 }
+                        }
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="pointer-events-none absolute left-0 top-full mt-2 w-72 rounded-xl bg-[#091826]/95 backdrop-blur-md border border-[#D49A4A]/50 p-3.5 text-start shadow-2xl z-50"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="absolute bottom-full left-5 -mb-px w-2.5 h-2.5 rotate-45 bg-[#091826] border-l border-t border-[#D49A4A]/50"
+                        />
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#D49A4A]">
+                            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                            <span>{t.nav.complianceLabel}</span>
+                          </span>
+                          <span className="text-[10px] font-semibold text-sky-200 bg-white/10 px-2 py-0.5 rounded">
+                            {regionFull}
+                          </span>
+                        </div>
+                        <div
+                          dir="ltr"
+                          className="flex flex-wrap items-center gap-1.5 mb-2"
+                        >
+                          {compliance.certs.map((cert) => (
+                            <span
+                              key={cert}
+                              className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 font-mono text-[10px] font-semibold text-white"
+                            >
+                              {cert}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-[11px] leading-snug text-slate-200">
+                          {compliance.summary}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
@@ -271,19 +358,99 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               {OFFICES.map((office) => {
                 const active = selectedRegionId === office.id;
+                const targetKey = `pill-${office.id}`;
+                const isTipVisible = hoveredRegionTarget === targetKey;
+                const compliance = t.nav.regionCompliance[office.id];
+                const regionFull =
+                  office.id === 'germany'
+                    ? t.regions.germanyFull
+                    : office.id === 'dubai'
+                      ? t.regions.dubaiFull
+                      : t.regions.londonFull;
+                const tipId = `nav-compliance-${targetKey}`;
+
                 return (
-                  <button
+                  <div
                     key={office.id}
-                    type="button"
-                    onClick={() => onSelectRegion(office.id)}
-                    className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full transition-colors cursor-pointer ${
-                      active
-                        ? 'bg-[#2E96D8] text-white'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
+                    className="relative"
+                    onMouseEnter={() => setHoveredRegionTarget(targetKey)}
+                    onMouseLeave={() =>
+                      setHoveredRegionTarget((prev) =>
+                        prev === targetKey ? null : prev
+                      )
+                    }
                   >
-                    {office.hubCode}
-                  </button>
+                    <button
+                      type="button"
+                      aria-describedby={tipId}
+                      onFocus={() => setHoveredRegionTarget(targetKey)}
+                      onBlur={() =>
+                        setHoveredRegionTarget((prev) =>
+                          prev === targetKey ? null : prev
+                        )
+                      }
+                      onClick={() => onSelectRegion(office.id)}
+                      className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full transition-colors cursor-pointer ${
+                        active
+                          ? 'bg-[#2E96D8] text-white'
+                          : 'text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      {office.hubCode}
+                    </button>
+
+                    <AnimatePresence>
+                      {isTipVisible && (
+                        <motion.div
+                          id={tipId}
+                          role="tooltip"
+                          initial={
+                            prefersReducedMotion
+                              ? { opacity: 1 }
+                              : { opacity: 0, y: -4, scale: 0.97 }
+                          }
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={
+                            prefersReducedMotion
+                              ? { opacity: 0 }
+                              : { opacity: 0, y: -4, scale: 0.97 }
+                          }
+                          transition={{ duration: 0.16, ease: 'easeOut' }}
+                          className="pointer-events-none absolute right-0 top-full mt-2.5 w-72 rounded-xl bg-[#091826]/95 backdrop-blur-md border border-[#D49A4A]/50 p-3.5 text-start shadow-2xl z-50"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="absolute bottom-full right-4 -mb-px w-2.5 h-2.5 rotate-45 bg-[#091826] border-l border-t border-[#D49A4A]/50"
+                          />
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#D49A4A]">
+                              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                              <span>{t.nav.complianceLabel}</span>
+                            </span>
+                            <span className="text-[10px] font-semibold text-sky-200 bg-white/10 px-2 py-0.5 rounded">
+                              {regionFull}
+                            </span>
+                          </div>
+                          <div
+                            dir="ltr"
+                            className="flex flex-wrap items-center gap-1.5 mb-2"
+                          >
+                            {compliance.certs.map((cert) => (
+                              <span
+                                key={cert}
+                                className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 font-mono text-[10px] font-semibold text-white"
+                              >
+                                {cert}
+                              </span>
+                            ))}
+                          </div>
+                          <p className="text-[11px] leading-snug text-slate-200">
+                            {compliance.summary}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 );
               })}
             </div>

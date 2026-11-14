@@ -33,6 +33,11 @@ export interface TranslationPack {
     mobileMenuMedia: string;
     mobileMenuTeam: string;
     mobileMenuBook: string;
+    complianceLabel: string;
+    regionCompliance: Record<
+      'london' | 'germany' | 'dubai',
+      { certs: string[]; summary: string }
+    >;
   };
   news: {
     ldnTag: string;
@@ -344,6 +349,21 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       mobileMenuMedia: 'Photos & Video',
       mobileMenuTeam: 'Clients & Team',
       mobileMenuBook: 'Book Service',
+      complianceLabel: 'Regional Compliance',
+      regionCompliance: {
+        london: {
+          certs: ['NICEIC', 'CIBSE', 'SafeContractor', 'F-Gas'],
+          summary: 'UK Electrical, HVAC Chiller & Statutory Safety Standards',
+        },
+        germany: {
+          certs: ['TÜV', 'VDE 0105', 'DIN EN', 'DGUV V3'],
+          summary: 'DACH Industrial Plant, Switchgear & Thermal QA',
+        },
+        dubai: {
+          certs: ['DEWA', 'SIRA', 'DCD', 'ISO 41001'],
+          summary: 'Dubai Grid, Civil Defense & Smart Security Approvals',
+        },
+      },
     },
     news: {
       ldnTag: 'LONDON HUB',
@@ -720,6 +740,21 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       mobileMenuMedia: 'Fotos & Videos',
       mobileMenuTeam: 'Kunden & Team',
       mobileMenuBook: 'Termin buchen',
+      complianceLabel: 'Regionale Zertifizierung',
+      regionCompliance: {
+        london: {
+          certs: ['NICEIC', 'CIBSE', 'SafeContractor', 'F-Gas'],
+          summary: 'UK Elektro-, Kälte- und gesetzliche Sicherheitsnormen',
+        },
+        germany: {
+          certs: ['TÜV', 'VDE 0105', 'DIN EN', 'DGUV V3'],
+          summary: 'DACH Industrieanlagen-, Schaltanlagen- & Thermoprüfung',
+        },
+        dubai: {
+          certs: ['DEWA', 'SIRA', 'DCD', 'ISO 41001'],
+          summary: 'Dubai Netz-, Brandschutz- & Sicherheitszulassungen',
+        },
+      },
     },
     news: {
       ldnTag: 'LONDON HUB',
@@ -1096,6 +1131,21 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       mobileMenuMedia: 'الصور والفيديو',
       mobileMenuTeam: 'العملاء والفريق',
       mobileMenuBook: 'حجز خدمة',
+      complianceLabel: 'الاعتمادات الإقليمية',
+      regionCompliance: {
+        london: {
+          certs: ['NICEIC', 'CIBSE', 'SafeContractor', 'F-Gas'],
+          summary: 'معايير الكهرباء والتبريد والسلامة المعتمدة في المملكة المتحدة',
+        },
+        germany: {
+          certs: ['TÜV', 'VDE 0105', 'DIN EN', 'DGUV V3'],
+          summary: 'معايير المنشآت الصناعية والفحص الحراري بألمانيا',
+        },
+        dubai: {
+          certs: ['DEWA', 'SIRA', 'DCD', 'ISO 41001'],
+          summary: 'اعتمادات ديوا والدفاع المدني والأمن الذكي بدبي',
+        },
+      },
     },
     news: {
       ldnTag: 'مركز لندن',
