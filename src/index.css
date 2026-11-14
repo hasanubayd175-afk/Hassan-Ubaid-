@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-quote: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-padding-top: 72px;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-quote {
+    font-family: var(--font-quote);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes kenBurnsSlow {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.05) translate3d(-0.8%, -0.6%, 0);
+  }
+  100% {
+    transform: scale(1.02) translate3d(0.6%, 0.3%, 0);
+  }
+}
+
+.animate-ken-burns {
+  animation: kenBurnsSlow 18s cubic-bezier(0.25, 0.1, 0.25, 1) infinite alternate;
+  will-change: transform;
+}
+
+.animate-ken-burns-paused {
+  animation-play-state: paused;
+}
+
+@keyframes partnerMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-partner-marquee {
+  display: flex;
+  width: max-content;
+  animation: partnerMarquee 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-partner-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes heroVerticalParallax {
+  from {
+    transform: translate3d(0, -6%, 0) scale(1.12);
+  }
+  to {
+    transform: translate3d(0, 8%, 0) scale(1.12);
+  }
+}
+
+.hero-parallax-bg {
+  background-image: url('./assets/images/hero_facility_operations_1794664790268.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  will-change: transform;
+}
+
+@supports (animation-timeline: view()) {
+  .hero-parallax-bg {
+    background-attachment: scroll;
+    animation: heroVerticalParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .hero-parallax-bg {
+    background-attachment: scroll;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ken-burns,
+  .animate-partner-marquee,
+  .hero-parallax-bg {
+    animation: none;
+    background-attachment: scroll;
+    transform: none;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

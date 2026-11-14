@@ -1,0 +1,57 @@
+{
+  "bookings": [],
+  "reviews": [
+    {
+      "id": "rev-1",
+      "authorName": "Claire Thornton",
+      "role": "Head of Workplace",
+      "organization": "Bishopsgate Asset Partners",
+      "regionId": "london",
+      "regionLabel": "London, UK",
+      "serviceName": "HVAC",
+      "rating": 5,
+      "comment": "Replaced two aging rooftop chillers over one weekend with zero tenant disruption. Energy draw dropped 34% in the very first quarter.",
+      "outcomeMetric": "-34% energy load in Q1",
+      "createdAt": "2026-10-18T09:30:00Z"
+    },
+    {
+      "id": "rev-2",
+      "authorName": "Stefan Becker",
+      "role": "Facility Operations Lead",
+      "organization": "RheinWerk Logistics GmbH",
+      "regionId": "germany",
+      "regionLabel": "Munich, Germany",
+      "serviceName": "Electrical Maintenance",
+      "rating": 5,
+      "comment": "Their VDE-certified team caught a phase imbalance during a routine thermal scan before it could halt our automated sorting bay.",
+      "outcomeMetric": "Zero unplanned outage",
+      "createdAt": "2026-10-29T14:15:00Z"
+    },
+    {
+      "id": "rev-3",
+      "authorName": "Nadia Haddad",
+      "role": "Development Director",
+      "organization": "Al-Maktoum Hospitality Group",
+      "regionId": "dubai",
+      "regionLabel": "Dubai, UAE",
+      "serviceName": "Construction",
+      "rating": 5,
+      "comment": "Seamless handover from structural fit-out and acoustic painting to IT cabling and biometric security across 60 suites in 42 days.",
+      "outcomeMetric": "Completed 6 days ahead of schedule",
+      "createdAt": "2026-11-04T11:20:00Z"
+    },
+    {
+      "id": "rev-4",
+      "authorName": "Oliver Bennett",
+      "role": "Estate Manager",
+      "organization": "Thameside Medical Suites",
+      "regionId": "london",
+      "regionLabel": "London, UK",
+      "serviceName": "Plumbing",
+      "rating": 5,
+      "comment": "Emergency riser repair arrived on site in 35 minutes at 2 a.m. Clean workmanship and full pressure certification before morning clinics.",
+      "outcomeMetric": "35 min overnight arrival",
+      "createdAt": "2026-11-09T08:05:00Z"
+    }
+  ]
+}

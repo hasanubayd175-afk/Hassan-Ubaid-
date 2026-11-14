@@ -1,0 +1,6 @@
+{
+  "name": "Kelvix Solutions",
+  "description": "Kelvix Solutions — Global facilities, MEP engineering, construction, IT, security, and property maintenance across London, Germany, and Dubai.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
