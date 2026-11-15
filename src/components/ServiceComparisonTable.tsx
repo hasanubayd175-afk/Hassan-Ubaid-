@@ -37,7 +37,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       key: 'category',
       label: t.comparison.rows.discipline,
       renderValue: (svc) => (
-        <span className="text-xs sm:text-sm font-medium text-[#132C40] dark:text-slate-100">
+        <span className="text-sm font-medium text-[#132C40] dark:text-slate-100">
           {t.services.categories[svc.categoryLabel] || svc.categoryLabel}
         </span>
       ),
@@ -58,7 +58,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       key: 'dispatchTier',
       label: t.comparison.rows.dispatchTier,
       renderValue: (svc) => (
-        <span className="text-xs sm:text-sm font-semibold text-[#132C40] dark:text-white">
+        <span className="text-sm font-semibold text-[#132C40] dark:text-white">
           {svc.specs.dispatchTier}
         </span>
       ),
@@ -67,7 +67,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       key: 'emergencySupport',
       label: t.comparison.rows.emergencySupport,
       renderValue: (svc) => (
-        <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+        <span className="text-sm text-slate-700 dark:text-slate-200">
           {svc.specs.emergencySupport}
         </span>
       ),
@@ -78,7 +78,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       renderValue: (svc) => (
         <span
           dir="ltr"
-          className="inline-block font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed"
+          className="inline-block font-mono text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed"
         >
           {svc.specs.certifications}
         </span>
@@ -88,7 +88,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       key: 'inspectionFrequency',
       label: t.comparison.rows.inspectionFrequency,
       renderValue: (svc) => (
-        <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+        <span className="text-sm text-slate-700 dark:text-slate-200">
           {svc.specs.inspectionFrequency}
         </span>
       ),
@@ -99,7 +99,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       renderValue: (svc) => (
         <span
           dir="ltr"
-          className="inline-block font-mono text-xs sm:text-sm font-medium text-[#132C40] dark:text-slate-100 tabular-nums"
+          className="inline-block font-mono text-sm font-medium text-[#132C40] dark:text-slate-100 tabular-nums"
         >
           {svc.specs.warrantyPeriod}
         </span>
@@ -109,7 +109,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       key: 'coverageRegions',
       label: t.comparison.rows.coverageRegions,
       renderValue: (svc) => (
-        <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+        <span className="text-sm text-slate-600 dark:text-slate-300">
           {svc.specs.coverageRegions}
         </span>
       ),
@@ -118,7 +118,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
       key: 'typicalDeliverables',
       label: t.comparison.rows.typicalDeliverables,
       renderValue: (svc) => (
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
           {svc.specs.typicalDeliverables}
         </p>
       ),
@@ -143,7 +143,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="w-8 h-px bg-[#D49A4A]" aria-hidden="true" />
-            <p className="text-xs font-semibold tracking-wider uppercase text-[#1D72B8] dark:text-[#2E96D8]">
+            <p className="text-sm font-semibold tracking-wider uppercase text-[#1D72B8] dark:text-[#2E96D8]">
               {t.comparison.eyebrow}
             </p>
           </div>
@@ -153,13 +153,13 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
           >
             {t.comparison.heading}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1">
             {t.comparison.subtitle}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-[#132C40] dark:text-slate-200 tabular-nums">
+          <span className="inline-flex items-center gap-1.5 font-mono text-sm font-semibold text-[#132C40] dark:text-slate-200 tabular-nums">
             <GitCompareArrows className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8]" />
             <span dir="ltr">{selectedServices.length} / 3</span>
             <span>{t.comparison.selectedOf3}</span>
@@ -168,7 +168,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
           <button
             type="button"
             onClick={onResetDefault}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/15 text-[#132C40] dark:text-slate-200 hover:border-[#1D72B8] dark:hover:border-[#2E96D8] transition-colors cursor-pointer min-h-[38px] whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/15 text-[#132C40] dark:text-slate-200 hover:border-[#1D72B8] dark:hover:border-[#2E96D8] transition-colors cursor-pointer min-h-[38px] whitespace-nowrap"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{t.comparison.top3Mep}</span>
@@ -178,7 +178,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
             <button
               type="button"
               onClick={onClearAll}
-              className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/15 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-800 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap"
+              className="px-3.5 py-2 rounded-lg text-sm font-semibold bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/15 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-800 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap"
             >
               {t.comparison.clearAll}
             </button>
@@ -340,7 +340,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
                   >
                     <th
                       scope="row"
-                      className="sticky start-0 z-10 px-5 py-4 text-xs sm:text-sm font-semibold text-[#132C40] dark:text-slate-200 bg-[#EBF1F8]/85 dark:bg-[#0B1724]/85 backdrop-blur-md border-e border-slate-200/70 dark:border-white/10 align-top"
+                      className="sticky start-0 z-10 px-5 py-4 text-sm font-semibold text-[#132C40] dark:text-slate-200 bg-[#EBF1F8]/85 dark:bg-[#0B1724]/85 backdrop-blur-md border-e border-slate-200/70 dark:border-white/10 align-top"
                     >
                       {row.label}
                     </th>
@@ -355,7 +355,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
                     {Array.from({ length: emptySlotsCount }).map((_, idx) => (
                       <td
                         key={`empty-${row.key}-${idx}`}
-                        className="px-5 py-4 border-r last:border-r-0 border-slate-200/60 dark:border-white/10 text-xs text-slate-400 dark:text-slate-600 align-top"
+                        className="px-5 py-4 border-r last:border-r-0 border-slate-200/60 dark:border-white/10 text-sm text-slate-400 dark:text-slate-600 align-top"
                       >
                         —
                       </td>
@@ -367,7 +367,7 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
                 <tr className="bg-white/10 backdrop-blur-md">
                   <th
                     scope="row"
-                    className="sticky start-0 z-10 px-5 py-4 text-xs sm:text-sm font-semibold text-[#132C40] dark:text-slate-200 bg-[#EBF1F8]/85 dark:bg-[#0B1724]/85 backdrop-blur-md border-e border-slate-200/70 dark:border-white/10"
+                    className="sticky start-0 z-10 px-5 py-4 text-sm font-semibold text-[#132C40] dark:text-slate-200 bg-[#EBF1F8]/85 dark:bg-[#0B1724]/85 backdrop-blur-md border-e border-slate-200/70 dark:border-white/10"
                   >
                     {t.comparison.rows.scheduleService}
                   </th>
@@ -379,12 +379,12 @@ export const ServiceComparisonTable: React.FC<ServiceComparisonTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onBookService(service.id)}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1D72B8] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] transition-colors cursor-pointer min-h-[40px] whitespace-nowrap"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1D72B8] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] transition-colors cursor-pointer min-h-[40px] whitespace-nowrap"
                       >
                         <span>
                           {t.services.bookPrefix} {t.services.names[service.id] || service.name}
                         </span>
-                        <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                        <ArrowRight className="w-4 h-4 shrink-0" />
                       </button>
                     </td>
                   ))}

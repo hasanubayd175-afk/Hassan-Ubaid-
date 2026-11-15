@@ -10,7 +10,9 @@ import {
   Film,
   Globe,
   Grid,
+  HelpCircle,
   Home,
+  LayoutGrid,
   MapPin,
   Menu,
   Moon,
@@ -24,7 +26,13 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+} from 'motion/react';
 import {
   CLIENT_SPOTLIGHT_CLIPS,
   ENGINEERING_SERVICE_IDS,
@@ -34,6 +42,7 @@ import {
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageCode } from '../i18n/translations';
 import { RegionId, ServiceCategory } from '../types/kelvis';
+import { scrollToTopSmooth } from '../utils/smoothScroll';
 
 const LANG_OPTIONS: { code: LanguageCode; label: string; title: string }[] = [
   { code: 'en', label: 'EN', title: 'English' },
@@ -70,11 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleTheme,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [openDropdown, setOpenDropdown] = useState<'services' | 'corporate' | null>(null);
-  const [servicesDropdownTab, setServicesDropdownTab] = useState<
-    'all' | 'engineering' | 'video-reels'
-  >('all');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newsIndex, setNewsIndex] = useState(0);
@@ -85,6 +90,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const smoothScrollScaleX = useSpring(scrollYProgress, {
+    stiffness: 180,
+    damping: 28,
+    restDelta: 0.001,
+  });
 
   const { language, setLanguage, t } = useLanguage();
 
@@ -131,44 +142,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, [newsPaused, regionalNews.length]);
 
   const activeNews = regionalNews[newsIndex] || regionalNews[0];
-
-  useEffect(() => {
-    let rafId = 0;
-
-    const updateProgress = () => {
-      rafId = 0;
-      const doc = document.documentElement;
-      const scrollTop = window.scrollY || doc.scrollTop || 0;
-      const maxScroll = Math.max(0, doc.scrollHeight - window.innerHeight);
-      const pct = maxScroll > 0 ? Math.min(100, Math.max(0, (scrollTop / maxScroll) * 100)) : 0;
-      setScrollProgress(Number(pct.toFixed(2)));
-    };
-
-    const scheduleUpdate = () => {
-      if (!rafId) {
-        rafId = window.requestAnimationFrame(updateProgress);
-      }
-    };
-
-    updateProgress();
-    window.addEventListener('scroll', scheduleUpdate, { passive: true });
-    window.addEventListener('resize', scheduleUpdate, { passive: true });
-
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined'
-        ? new ResizeObserver(() => scheduleUpdate())
-        : null;
-    if (resizeObserver) {
-      resizeObserver.observe(document.documentElement);
-    }
-
-    return () => {
-      if (rafId) window.cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', scheduleUpdate);
-      window.removeEventListener('resize', scheduleUpdate);
-      resizeObserver?.disconnect();
-    };
-  }, [activeTab]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -228,15 +201,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     setMobileMenuOpen(false);
     setOpenDropdown(null);
     onSelectTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTopSmooth();
   };
 
   return (
     <>
       {/* Top Regional Hubs Utility Bar */}
       <div className="hidden lg:block relative z-50 bg-[#0E2233] text-slate-200 border-b border-[#132C40]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-6 text-[11px]">
-          <div className="flex items-center gap-5 min-w-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-4 min-w-0">
             <span className="font-semibold text-white shrink-0">
               {t.nav.regionalHubs}
             </span>
@@ -308,35 +281,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                             : { opacity: 0, y: -4, scale: 0.97 }
                         }
                         transition={{ duration: 0.16, ease: 'easeOut' }}
-                        className="pointer-events-none absolute left-0 top-full mt-2 w-72 rounded-xl bg-[#091826]/95 backdrop-blur-md border border-[#D49A4A]/50 p-3.5 text-start shadow-2xl z-50"
+                        className="pointer-events-none absolute left-0 top-full mt-2 w-80 rounded-xl bg-[#091826]/95 backdrop-blur-md border border-[#D49A4A]/50 p-4 text-start shadow-2xl z-50"
                       >
                         <span
                           aria-hidden="true"
                           className="absolute bottom-full left-5 -mb-px w-2.5 h-2.5 rotate-45 bg-[#091826] border-l border-t border-[#D49A4A]/50"
                         />
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#D49A4A]">
-                            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[#D49A4A]">
+                            <ShieldCheck className="w-4 h-4 shrink-0" />
                             <span>{t.nav.complianceLabel}</span>
                           </span>
-                          <span className="text-[10px] font-semibold text-sky-200 bg-white/10 px-2 py-0.5 rounded">
+                          <span className="text-xs font-semibold text-sky-200 bg-white/10 px-2 py-0.5 rounded">
                             {regionFull}
                           </span>
                         </div>
                         <div
                           dir="ltr"
-                          className="flex flex-wrap items-center gap-1.5 mb-2"
+                          className="flex flex-wrap items-center gap-1.5 mb-2.5"
                         >
                           {compliance.certs.map((cert) => (
                             <span
                               key={cert}
-                              className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 font-mono text-[10px] font-semibold text-white"
+                              className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 font-mono text-xs font-semibold text-white"
                             >
                               {cert}
                             </span>
                           ))}
                         </div>
-                        <p className="text-[11px] leading-snug text-slate-200">
+                        <p className="text-xs sm:text-sm leading-relaxed text-slate-200">
                           {compliance.summary}
                         </p>
                       </motion.div>
@@ -390,7 +363,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         )
                       }
                       onClick={() => onSelectRegion(office.id)}
-                      className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full transition-colors cursor-pointer ${
+                      className={`px-2.5 py-0.5 text-xs font-semibold rounded-full transition-colors cursor-pointer ${
                         active
                           ? 'bg-[#2E96D8] text-white'
                           : 'text-slate-300 hover:text-white'
@@ -416,35 +389,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                               : { opacity: 0, y: -4, scale: 0.97 }
                           }
                           transition={{ duration: 0.16, ease: 'easeOut' }}
-                          className="pointer-events-none absolute right-0 top-full mt-2.5 w-72 rounded-xl bg-[#091826]/95 backdrop-blur-md border border-[#D49A4A]/50 p-3.5 text-start shadow-2xl z-50"
+                          className="pointer-events-none absolute right-0 top-full mt-2.5 w-80 rounded-xl bg-[#091826]/95 backdrop-blur-md border border-[#D49A4A]/50 p-4 text-start shadow-2xl z-50"
                         >
                           <span
                             aria-hidden="true"
                             className="absolute bottom-full right-4 -mb-px w-2.5 h-2.5 rotate-45 bg-[#091826] border-l border-t border-[#D49A4A]/50"
                           />
-                          <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#D49A4A]">
-                              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                          <div className="flex items-center justify-between gap-2 mb-2.5">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[#D49A4A]">
+                              <ShieldCheck className="w-4 h-4 shrink-0" />
                               <span>{t.nav.complianceLabel}</span>
                             </span>
-                            <span className="text-[10px] font-semibold text-sky-200 bg-white/10 px-2 py-0.5 rounded">
+                            <span className="text-xs font-semibold text-sky-200 bg-white/10 px-2 py-0.5 rounded">
                               {regionFull}
                             </span>
                           </div>
                           <div
                             dir="ltr"
-                            className="flex flex-wrap items-center gap-1.5 mb-2"
+                            className="flex flex-wrap items-center gap-1.5 mb-2.5"
                           >
                             {compliance.certs.map((cert) => (
                               <span
                                 key={cert}
-                                className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 font-mono text-[10px] font-semibold text-white"
+                                className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 font-mono text-xs font-semibold text-white"
                               >
                                 {cert}
                               </span>
                             ))}
                           </div>
-                          <p className="text-[11px] leading-snug text-slate-200">
+                          <p className="text-xs sm:text-sm leading-relaxed text-slate-200">
                             {compliance.summary}
                           </p>
                         </motion.div>
@@ -457,9 +430,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNav('book')}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[11px] font-medium text-white transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-medium text-white transition-colors cursor-pointer whitespace-nowrap"
             >
-              <Phone className="w-3 h-3 text-[#D49A4A]" />
+              <Phone className="w-3.5 h-3.5 text-[#D49A4A]" />
               <span>{t.nav.clientDispatch}</span>
             </button>
           </div>
@@ -471,43 +444,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         ref={navRef}
         className="sticky top-0 z-40 bg-white/95 dark:bg-[#0B1926]/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 text-[#132C40] dark:text-slate-100 transition-colors duration-200"
       >
-        {/* Slim Top Scroll Progress Indicator */}
+        {/* Slim Top GPU-Spring Scroll Progress Indicator */}
         <div
-          role="progressbar"
-          aria-label="Page scroll progress"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(scrollProgress)}
+          aria-hidden="true"
           className="w-full h-[3px] bg-slate-100 dark:bg-slate-800 overflow-hidden"
         >
-          <svg
-            viewBox="0 0 100 1"
-            preserveAspectRatio="none"
-            className="block w-full h-full"
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient
-                id="kelvix-scroll-grad"
-                gradientUnits="userSpaceOnUse"
-                x1="0"
-                y1="0"
-                x2="100"
-                y2="0"
-              >
-                <stop offset="0%" stopColor="#1D72B8" />
-                <stop offset="50%" stopColor="#2E96D8" />
-                <stop offset="100%" stopColor="#D49A4A" />
-              </linearGradient>
-            </defs>
-            <rect
-              x="0"
-              y="0"
-              width={scrollProgress}
-              height="1"
-              fill="url(#kelvix-scroll-grad)"
-            />
-          </svg>
+          <motion.div
+            style={{
+              scaleX: prefersReducedMotion ? scrollYProgress : smoothScrollScaleX,
+            }}
+            className="h-full w-full origin-left bg-gradient-to-r from-[#1D72B8] via-[#2E96D8] to-[#D49A4A]"
+          />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-16 flex items-center justify-between gap-4">
@@ -515,7 +462,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => handleNav('home')}
-            className="flex items-center gap-2.5 font-display text-sm md:text-base font-bold tracking-tight text-[#132C40] dark:text-white whitespace-nowrap shrink-0 cursor-pointer"
+            className="flex items-center gap-2.5 font-display text-base md:text-lg font-bold tracking-tight text-[#132C40] dark:text-white whitespace-nowrap shrink-0 cursor-pointer"
           >
             <svg
               viewBox="0 0 32 32"
@@ -548,18 +495,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Center Tabs */}
           <nav
             aria-label="Primary navigation"
-            className="hidden md:flex items-center gap-2 lg:gap-4 text-xs sm:text-sm font-medium"
+            className="hidden md:flex items-center gap-2 lg:gap-4 text-sm font-medium"
           >
             <button
               type="button"
               onClick={() => handleNav('home')}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold tracking-wide transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold tracking-wide transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeTab === 'home'
                   ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white'
                   : 'text-[#132C40] dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80'
               }`}
             >
-              <Home className={`w-3.5 h-3.5 ${activeTab === 'home' ? 'text-[#2E96D8] dark:text-[#D49A4A]' : 'text-[#1D72B8] dark:text-[#2E96D8]'}`} />
+              <Home className={`w-4 h-4 ${activeTab === 'home' ? 'text-[#2E96D8] dark:text-[#D49A4A]' : 'text-[#1D72B8] dark:text-[#2E96D8]'}`} />
               <span>{t.nav.homePage}</span>
             </button>
 
@@ -573,149 +520,88 @@ export const Navbar: React.FC<NavbarProps> = ({
                     prev === 'services' ? null : 'services'
                   )
                 }
-                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeTab === 'services'
                     ? 'bg-slate-100 dark:bg-slate-800 text-[#132C40] dark:text-white font-semibold'
                     : 'text-slate-700 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/70'
                 }`}
               >
-                <Building2 className="w-3.5 h-3.5 text-[#1D72B8] dark:text-[#2E96D8]" />
+                <Building2 className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8]" />
                 <span>{t.nav.servicesSolutions}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-slate-400" />
               </button>
 
               {openDropdown === 'services' && (
-                <div className="absolute left-0 top-full mt-2 w-[470px] rounded-xl bg-white dark:bg-[#0E2233] border border-slate-200 dark:border-slate-700 shadow-2xl p-4 z-50">
-                  {/* Internal Tabs inside Services & Solutions Dropdown */}
-                  <div
-                    role="tablist"
-                    aria-label="Services & Solutions views"
-                    className="grid grid-cols-3 gap-1 p-1 mb-3 rounded-lg bg-slate-100 dark:bg-[#0B1926] border border-slate-200/80 dark:border-slate-800"
-                  >
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={servicesDropdownTab === 'all'}
-                      onClick={() => setServicesDropdownTab('all')}
-                      className={`px-2 py-1.5 rounded-md text-[11px] font-semibold transition-colors cursor-pointer truncate ${
-                        servicesDropdownTab === 'all'
-                          ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white shadow-xs'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white'
-                      }`}
-                    >
-                      {t.services.catAll}
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={servicesDropdownTab === 'engineering'}
-                      onClick={() => setServicesDropdownTab('engineering')}
-                      className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-semibold transition-colors cursor-pointer truncate ${
-                        servicesDropdownTab === 'engineering'
-                          ? 'bg-[#D49A4A] text-[#0E2233] shadow-xs'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white'
-                      }`}
-                    >
-                      <Cpu className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{t.nav.engineeringSolutions}</span>
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={servicesDropdownTab === 'video-reels'}
-                      onClick={() => setServicesDropdownTab('video-reels')}
-                      className={`inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-semibold transition-colors cursor-pointer truncate ${
-                        servicesDropdownTab === 'video-reels'
-                          ? 'bg-[#1D72B8] text-white shadow-xs'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white'
-                      }`}
-                    >
-                      <Video className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{t.services.catVideoReels}</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-xs font-semibold text-[#132C40] dark:text-white">
-                      {servicesDropdownTab === 'engineering'
-                        ? t.nav.engineeringSolutions
-                        : servicesDropdownTab === 'video-reels'
-                          ? t.services.catVideoReels
-                          : t.nav.all13Services}
-                    </span>
+                <div className="absolute left-0 top-full mt-2 w-72 rounded-xl bg-white dark:bg-[#0E2233] border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-50">
+                  <div className="space-y-0.5">
                     <button
                       type="button"
                       onClick={() => {
-                        onSelectServiceCategory?.(servicesDropdownTab);
+                        onSelectServiceCategory?.('all');
                         handleNav('services');
                       }}
-                      className="text-xs font-semibold text-[#1D72B8] dark:text-[#2E96D8] hover:text-[#132C40] dark:hover:text-white inline-flex items-center gap-1 cursor-pointer shrink-0"
+                      className="w-full text-start px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center justify-between gap-2.5 cursor-pointer"
                     >
-                      <span>{t.nav.viewDirectory}</span>
-                      <ArrowRight className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-2.5 min-w-0">
+                        <LayoutGrid className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8] shrink-0" />
+                        <span className="truncate">{t.nav.all13Services}</span>
+                      </span>
+                      <span dir="ltr" className="font-mono text-xs text-slate-400 shrink-0">
+                        {SERVICES.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectServiceCategory?.('engineering');
+                        handleNav('services');
+                      }}
+                      className="w-full text-start px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center justify-between gap-2.5 cursor-pointer"
+                    >
+                      <span className="inline-flex items-center gap-2.5 min-w-0">
+                        <Cpu className="w-4 h-4 text-[#D49A4A] shrink-0" />
+                        <span className="truncate">{t.nav.engineeringSolutions}</span>
+                      </span>
+                      <span dir="ltr" className="font-mono text-xs text-slate-400 shrink-0">
+                        {ENGINEERING_SERVICE_IDS.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectServiceCategory?.('video-reels');
+                        handleNav('services');
+                      }}
+                      className="w-full text-start px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center justify-between gap-2.5 cursor-pointer"
+                    >
+                      <span className="inline-flex items-center gap-2.5 min-w-0">
+                        <Video className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8] shrink-0" />
+                        <span className="truncate">{t.services.catVideoReels}</span>
+                      </span>
+                      <span dir="ltr" className="font-mono text-xs text-slate-400 shrink-0">
+                        {CLIENT_SPOTLIGHT_CLIPS.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectServiceCategory?.('faqs');
+                        handleNav('services');
+                      }}
+                      className="w-full text-start px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center justify-between gap-2.5 cursor-pointer"
+                    >
+                      <span className="inline-flex items-center gap-2.5 min-w-0">
+                        <HelpCircle className="w-4 h-4 text-[#D49A4A] shrink-0" />
+                        <span className="truncate">{t.services.catFaqs}</span>
+                      </span>
+                      <span dir="ltr" className="font-mono text-xs text-slate-400 shrink-0">
+                        {t.faq.items.length}
+                      </span>
                     </button>
                   </div>
-
-                  {servicesDropdownTab === 'video-reels' ? (
-                    <div className="space-y-1.5">
-                      {CLIENT_SPOTLIGHT_CLIPS.map((clip) => (
-                        <button
-                          key={clip.id}
-                          type="button"
-                          onClick={() => {
-                            setOpenDropdown(null);
-                            onSelectServiceCategory?.('video-reels');
-                            onSelectTab('services');
-                          }}
-                          className="w-full text-left px-2.5 py-2 rounded-lg text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center justify-between gap-2.5 cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Play className="w-3.5 h-3.5 text-[#D49A4A] shrink-0" />
-                            <div className="min-w-0">
-                              <p className="font-semibold truncate">{clip.clipTitle}</p>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                                {clip.partnerName} · {clip.regionLabel}
-                              </p>
-                            </div>
-                          </div>
-                          <span
-                            dir="ltr"
-                            className="font-mono text-[10px] font-semibold text-[#1D72B8] dark:text-[#56B4EE] shrink-0"
-                          >
-                            {clip.durationFormatted}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {(servicesDropdownTab === 'engineering'
-                        ? SERVICES.filter((svc) =>
-                            (ENGINEERING_SERVICE_IDS as readonly string[]).includes(
-                              svc.id
-                            )
-                          )
-                        : SERVICES
-                      ).map((svc) => (
-                        <button
-                          key={svc.id}
-                          type="button"
-                          onClick={() => {
-                            setOpenDropdown(null);
-                            onSelectServiceCategory?.(servicesDropdownTab);
-                            onSelectService(svc.id);
-                            onSelectTab('services');
-                          }}
-                          className="text-left px-2.5 py-2 rounded-lg text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white font-medium flex items-center justify-between gap-2 cursor-pointer"
-                        >
-                          <span className="truncate">{t.services.names[svc.id] || svc.name}</span>
-                          <span dir="ltr" className="font-mono text-[10px] text-slate-400 shrink-0">
-                            {svc.responseSla}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -730,23 +616,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                     prev === 'corporate' ? null : 'corporate'
                   )
                 }
-                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeTab === 'media' || activeTab === 'team'
                     ? 'bg-slate-100 dark:bg-slate-800 text-[#132C40] dark:text-white font-semibold'
                     : 'text-slate-700 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/70'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#1D72B8] dark:text-[#2E96D8]" />
+                <ShieldCheck className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8]" />
                 <span>{t.nav.corporateHub}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-slate-400" />
               </button>
 
               {openDropdown === 'corporate' && (
-                <div className="absolute left-0 top-full mt-2 w-60 rounded-xl bg-white dark:bg-[#0E2233] border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-50">
+                <div className="absolute left-0 top-full mt-2 w-64 rounded-xl bg-white dark:bg-[#0E2233] border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-50">
                   <button
                     type="button"
                     onClick={() => handleNav('media')}
-                    className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center gap-2.5 cursor-pointer"
+                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center gap-2.5 cursor-pointer"
                   >
                     <Film className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8]" />
                     <span>{t.nav.photosVideo}</span>
@@ -754,7 +640,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => handleNav('team')}
-                    className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center gap-2.5 cursor-pointer"
+                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center gap-2.5 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8]" />
                     <span>{t.nav.clientsTeam}</span>
@@ -762,7 +648,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <a
                     href="#locations"
                     onClick={() => setOpenDropdown(null)}
-                    className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center gap-2.5"
+                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#132C40] dark:hover:text-white flex items-center gap-2.5"
                   >
                     <MapPin className="w-4 h-4 text-[#D49A4A]" />
                     <span>{t.nav.globalOfficesMap}</span>
@@ -778,11 +664,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search services and offices"
-              className="hidden 2xl:inline-flex items-center gap-2.5 px-3 py-2 text-xs text-slate-500 dark:text-slate-300 bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] border border-slate-200 dark:border-slate-700 rounded-lg min-h-[38px] cursor-pointer transition-colors"
+              className="hidden 2xl:inline-flex items-center gap-2.5 px-3 py-2 text-sm text-slate-500 dark:text-slate-300 bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] border border-slate-200 dark:border-slate-700 rounded-lg min-h-[38px] cursor-pointer transition-colors"
             >
-              <Search className="w-3.5 h-3.5 text-slate-400" />
+              <Search className="w-4 h-4 text-slate-400" />
               <span>{t.nav.searchPlaceholder}</span>
-              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-[#0B1926] border border-slate-200 dark:border-slate-700 rounded text-slate-500 dark:text-slate-300">
+              <kbd className="px-1.5 py-0.5 text-xs font-mono bg-white dark:bg-[#0B1926] border border-slate-200 dark:border-slate-700 rounded text-slate-500 dark:text-slate-300">
                 ⌘K
               </kbd>
             </button>
@@ -815,7 +701,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => setLanguage(opt.code)}
                     title={opt.title}
                     aria-pressed={active}
-                    className={`px-2 py-1.5 text-[11px] font-semibold rounded-md transition-colors cursor-pointer whitespace-nowrap ${
+                    className={`px-2 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer whitespace-nowrap ${
                       active
                         ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white shadow-xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white'
@@ -841,16 +727,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'Theme: Midnight Professional (Switch to Classic Light)'
                   : 'Theme: Classic Light (Switch to Midnight Professional)'
               }
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] text-xs font-semibold text-[#132C40] dark:text-slate-100 min-h-[38px] cursor-pointer transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] text-sm font-semibold text-[#132C40] dark:text-slate-100 min-h-[38px] cursor-pointer transition-colors whitespace-nowrap shrink-0"
             >
               {theme === 'dark' ? (
                 <>
-                  <Sun className="w-3.5 h-3.5 text-[#D49A4A] shrink-0" />
+                  <Sun className="w-4 h-4 text-[#D49A4A] shrink-0" />
                   <span className="hidden xl:inline">{t.nav.classicLight}</span>
                 </>
               ) : (
                 <>
-                  <Moon className="w-3.5 h-3.5 text-[#1D72B8] shrink-0" />
+                  <Moon className="w-4 h-4 text-[#1D72B8] shrink-0" />
                   <span className="hidden xl:inline">{t.nav.midnight}</span>
                 </>
               )}
@@ -859,9 +745,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => handleNav('book')}
-              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-semibold text-white bg-[#1D72B8] hover:bg-[#132C40] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] rounded-lg transition-colors whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-sm font-semibold text-white bg-[#1D72B8] hover:bg-[#132C40] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] rounded-lg transition-colors whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer shadow-sm"
             >
-              <CalendarCheck className="w-3.5 h-3.5" />
+              <CalendarCheck className="w-4 h-4" />
               <span className="hidden sm:inline">{t.nav.bookService}</span>
             </button>
 
@@ -893,7 +779,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => handleNav(item.id)}
-                  className={`text-left px-3.5 py-2.5 text-xs font-medium rounded-lg min-h-[44px] ${
+                  className={`text-left px-3.5 py-2.5 text-sm font-medium rounded-lg min-h-[44px] ${
                     activeTab === item.id
                       ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white'
                       : 'bg-slate-100 dark:bg-[#132C40] text-[#132C40] dark:text-slate-100'
@@ -905,16 +791,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="text-left px-3.5 py-2.5 text-xs font-medium rounded-lg min-h-[44px] bg-slate-100 dark:bg-[#132C40] text-[#132C40] dark:text-slate-100 flex items-center gap-2"
+                className="text-left px-3.5 py-2.5 text-sm font-medium rounded-lg min-h-[44px] bg-slate-100 dark:bg-[#132C40] text-[#132C40] dark:text-slate-100 flex items-center gap-2"
               >
                 {theme === 'dark' ? (
                   <>
-                    <Sun className="w-3.5 h-3.5 text-[#D49A4A]" />
+                    <Sun className="w-4 h-4 text-[#D49A4A]" />
                     <span>{t.nav.classicLight}</span>
                   </>
                 ) : (
                   <>
-                    <Moon className="w-3.5 h-3.5 text-[#1D72B8]" />
+                    <Moon className="w-4 h-4 text-[#1D72B8]" />
                     <span>{t.nav.midnightTheme}</span>
                   </>
                 )}
@@ -929,18 +815,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         aria-label="Live regional news tracker"
         className="bg-[#0E2233] text-white border-b border-[#1D72B8]/30"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3 text-sm">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#1D72B8] text-white font-bold text-[10px] tracking-wider uppercase shrink-0">
-              <Newspaper className="w-3 h-3 text-[#D49A4A]" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#1D72B8] text-white font-bold text-xs tracking-wider uppercase shrink-0">
+              <Newspaper className="w-3.5 h-3.5 text-[#D49A4A]" />
               <span>{t.nav.liveNews}</span>
             </span>
 
-            <span dir="ltr" className="hidden sm:inline font-mono text-[11px] text-slate-400 shrink-0 tabular-nums">
+            <span dir="ltr" className="hidden sm:inline font-mono text-xs text-slate-400 shrink-0 tabular-nums">
               0{newsIndex + 1}/0{regionalNews.length}
             </span>
 
-            <span className="hidden md:inline-flex px-2 py-0.5 rounded bg-white/10 border border-white/15 text-[10px] font-semibold text-[#D49A4A] tracking-wide shrink-0">
+            <span className="hidden md:inline-flex px-2 py-0.5 rounded bg-white/10 border border-white/15 text-xs font-semibold text-[#D49A4A] tracking-wide shrink-0">
               {activeNews.tag}
             </span>
 
@@ -960,10 +846,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   handleNav('book');
                 }
               }}
-              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#D49A4A] hover:bg-[#c18739] text-[#0E2233] font-bold text-[11px] transition-colors cursor-pointer whitespace-nowrap"
+              className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-md bg-[#D49A4A] hover:bg-[#c18739] text-[#0E2233] font-bold text-xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <span>{activeNews.cta}</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
 
             <button
@@ -1041,7 +927,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <div className="p-4 max-h-[60vh] overflow-y-auto space-y-5">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                   {t.nav.servicesHeading}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -1053,12 +939,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setSearchOpen(false);
                         onSelectService(svc.id);
                       }}
-                      className="text-left px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-[#132C40] border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 cursor-pointer"
+                      className="text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-[#132C40] border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 cursor-pointer"
                     >
-                      <span className="text-xs font-semibold text-[#132C40] dark:text-white">
+                      <span className="text-sm font-semibold text-[#132C40] dark:text-white">
                         {t.services.names[svc.id] || svc.name}
                       </span>
-                      <span dir="ltr" className="font-mono text-[10px] text-[#1D72B8] dark:text-[#2E96D8]">
+                      <span dir="ltr" className="font-mono text-xs text-[#1D72B8] dark:text-[#2E96D8]">
                         {svc.responseSla}
                       </span>
                     </button>
@@ -1067,7 +953,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                   {t.nav.hubsHeading}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1080,16 +966,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onSelectRegion(office.id);
                         onSelectTab('book');
                       }}
-                      className="text-left p-2.5 rounded-lg bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] border border-slate-200 dark:border-slate-700 cursor-pointer"
+                      className="text-left p-3 rounded-lg bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] border border-slate-200 dark:border-slate-700 cursor-pointer"
                     >
-                      <p className="text-xs font-bold text-[#132C40] dark:text-white">
+                      <p className="text-sm font-bold text-[#132C40] dark:text-white">
                         {office.id === 'germany'
                           ? t.regions.germany
                           : office.id === 'dubai'
                             ? t.regions.dubai
                             : t.regions.london}
                       </p>
-                      <p dir="ltr" className="font-mono text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">
+                      <p dir="ltr" className="font-mono text-xs text-slate-500 dark:text-slate-300 mt-0.5">
                         {office.phone}
                       </p>
                     </button>

@@ -84,14 +84,14 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
           <div className="space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-medium text-[#1D72B8] dark:text-[#2E96D8] flex items-center gap-1.5">
+                <p className="text-sm font-medium text-[#1D72B8] dark:text-[#2E96D8] flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>{getRegionDisplay(member.hub)}</span>
                 </p>
                 <h3 className="font-display text-xl sm:text-2xl font-bold text-[#132C40] dark:text-white tracking-tight mt-0.5">
                   {member.name}
                 </h3>
-                <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
+                <p className="text-sm sm:text-base font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
                   {member.role}
                 </p>
               </div>
@@ -105,11 +105,11 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
               {member.bio}
             </p>
 
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-1 text-[11px] font-mono text-slate-600 dark:text-slate-300">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-1 text-xs sm:text-sm font-mono text-slate-600 dark:text-slate-300">
               <span className="font-semibold text-[#132C40] dark:text-[#D49A4A]">
                 {member.specialty}
               </span>
@@ -125,14 +125,14 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-3.5 border-t border-slate-100 dark:border-slate-800">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono text-slate-500 dark:text-slate-400">
               <Award className="w-3.5 h-3.5 text-[#D49A4A]" aria-hidden="true" />
               <span>{member.hub}</span>
             </span>
             <button
               type="button"
               onClick={() => onBookRegion(regionId)}
-              className="px-3.5 py-1.5 rounded-lg bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1D72B8] dark:hover:bg-[#D49A4A] text-white dark:hover:text-[#0E2233] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+              className="px-4 py-2 rounded-lg bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1D72B8] dark:hover:bg-[#D49A4A] text-white dark:hover:text-[#0E2233] text-sm font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
             >
               <span>{t.clientsTeam.book}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -182,22 +182,22 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
           </div>
 
           <div className="p-5 sm:p-6 space-y-2.5">
-            <p className="text-xs font-medium text-[#1D72B8] dark:text-[#2E96D8] flex items-center gap-1.5">
+            <p className="text-sm font-medium text-[#1D72B8] dark:text-[#2E96D8] flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>{getRegionDisplay(member.hub)}</span>
             </p>
             <div>
-              <h3 className="font-display text-lg sm:text-xl font-bold text-[#132C40] dark:text-white tracking-tight">
+              <h3 className="font-display text-xl sm:text-2xl font-bold text-[#132C40] dark:text-white tracking-tight">
                 {member.name}
               </h3>
-              <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
+              <p className="text-sm sm:text-base font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
                 {member.role}
               </p>
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
               {member.bio}
             </p>
-            <p className="pt-1 text-[11px] font-mono text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="pt-1 text-xs sm:text-sm font-mono text-slate-500 dark:text-slate-400 leading-relaxed">
               <span className="font-semibold text-[#132C40] dark:text-slate-200">
                 {member.specialty}
               </span>
@@ -208,13 +208,13 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
         </div>
 
         <div className="px-5 sm:px-6 pb-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
             {member.hub}
           </span>
           <button
             type="button"
             onClick={() => onBookRegion(regionId)}
-            className="px-3 py-1.5 rounded-lg bg-[#F6F9FC] dark:bg-[#0B1724] hover:bg-[#132C40] dark:hover:bg-[#1D72B8] text-[#132C40] dark:text-slate-100 hover:text-white border border-slate-200 dark:border-slate-700 text-xs font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
+            className="px-3.5 py-2 rounded-lg bg-[#F6F9FC] dark:bg-[#0B1724] hover:bg-[#132C40] dark:hover:bg-[#1D72B8] text-[#132C40] dark:text-slate-100 hover:text-white border border-slate-200 dark:border-slate-700 text-sm font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
           >
             <span>{t.clientsTeam.book}</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -234,7 +234,7 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="w-8 h-px bg-[#D49A4A]" aria-hidden="true" />
-              <p className="text-xs font-semibold tracking-wider uppercase text-[#1D72B8] dark:text-[#2E96D8]">
+              <p className="text-sm font-semibold tracking-wider uppercase text-[#1D72B8] dark:text-[#2E96D8]">
                 {t.regions.london} · {t.regions.germany} · {t.regions.dubai}
               </p>
             </div>
@@ -243,7 +243,7 @@ export const ClientsTeamSection: React.FC<ClientsTeamSectionProps> = ({
                 ? t.clientsTeam.clientsHeading
                 : t.clientsTeam.teamHeading}
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1.5">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-1.5">
               {activeTab === 'clients'
                 ? t.clientsTeam.clientsSub
                 : t.clientsTeam.teamSub}

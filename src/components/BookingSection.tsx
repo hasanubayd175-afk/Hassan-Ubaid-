@@ -141,7 +141,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#132C40] dark:text-white">
             {t.booking.heading}
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1.5">
+          <p className="text-base text-slate-600 dark:text-slate-300 mt-1.5">
             {t.booking.subtitle}
           </p>
         </div>
@@ -158,7 +158,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
               <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                 <div>
-                  <span className="text-xs text-neutral-300">
+                  <span className="text-sm text-neutral-300">
                     {getRegionName(activeOffice.id)} ·{' '}
                     <span dir="ltr" className="font-mono tabular-nums">
                       {activeService.responseSla} {t.services.sla}
@@ -175,7 +175,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               <div>
                 <label
                   htmlFor="booking-service-select"
-                  className="block text-xs font-medium text-neutral-500 dark:text-slate-300 mb-1.5"
+                  className="block text-sm font-medium text-neutral-600 dark:text-slate-300 mb-1.5"
                 >
                   {t.booking.serviceLabel}
                 </label>
@@ -183,7 +183,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   id="booking-service-select"
                   value={activeService.id}
                   onChange={(e) => onChangeService(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm font-medium bg-white dark:bg-[#0B1724] border border-slate-200 dark:border-slate-700 focus:border-[#132C40] dark:focus:border-[#2E96D8] rounded-xl text-[#132C40] dark:text-white focus:outline-none min-h-[44px]"
+                  className="w-full px-3.5 py-2.5 text-sm sm:text-base font-medium bg-white dark:bg-[#0B1724] border border-slate-200 dark:border-slate-700 focus:border-[#132C40] dark:focus:border-[#2E96D8] rounded-xl text-[#132C40] dark:text-white focus:outline-none min-h-[44px]"
                 >
                   {SERVICES.map((svc) => (
                     <option key={svc.id} value={svc.id}>
@@ -194,7 +194,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-500 dark:text-slate-300 mb-1.5">
+                <span className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
                   {t.booking.regionLabel}
                 </span>
                 <div className="grid grid-cols-3 gap-2">
@@ -205,7 +205,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         key={office.id}
                         type="button"
                         onClick={() => onChangeRegion(office.id)}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors min-h-[44px] cursor-pointer ${
+                        className={`px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors min-h-[44px] cursor-pointer ${
                           active
                             ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white'
                             : 'bg-white dark:bg-[#102336] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-500'
@@ -219,7 +219,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-500 dark:text-slate-300 mb-1.5">
+                <span className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
                   {t.booking.propertyLabel}
                 </span>
                 <div className="grid grid-cols-3 gap-2">
@@ -230,7 +230,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         key={pt}
                         type="button"
                         onClick={() => setPropertyType(pt)}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-colors min-h-[44px] cursor-pointer ${
+                        className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[44px] cursor-pointer ${
                           active
                             ? 'bg-[#2E96D8] text-white'
                             : 'bg-white dark:bg-[#102336] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-500'
@@ -252,7 +252,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 <div className="flex items-center gap-3 mb-6">
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <div>
-                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
                       {t.booking.confirmedLabel}
                     </p>
                     <h3
@@ -264,9 +264,9 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#0B1724] border border-slate-100 dark:border-slate-800 text-sm mb-6">
+                <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#0B1724] border border-slate-100 dark:border-slate-800 text-sm sm:text-base mb-6">
                   <div>
-                    <span className="text-xs text-neutral-500 dark:text-slate-400 block">
+                    <span className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 block">
                       {t.booking.serviceLabel}
                     </span>
                     <span className="font-semibold text-neutral-950 dark:text-white">
@@ -275,7 +275,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                     </span>
                   </div>
                   <div>
-                    <span className="text-xs text-neutral-500 dark:text-slate-400 block">
+                    <span className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 block">
                       {t.booking.regionLabel}
                     </span>
                     <span className="font-semibold text-neutral-950 dark:text-white">
@@ -283,7 +283,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                     </span>
                   </div>
                   <div>
-                    <span className="text-xs text-neutral-500 dark:text-slate-400 block">
+                    <span className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 block">
                       {t.booking.windowLabel}
                     </span>
                     <span
@@ -294,7 +294,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                     </span>
                   </div>
                   <div>
-                    <span className="text-xs text-neutral-500 dark:text-slate-400 block">
+                    <span className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 block">
                       {t.booking.addressPlaceholder.replace(' *', '')}
                     </span>
                     <span className="font-semibold text-neutral-950 dark:text-white truncate block">
@@ -306,7 +306,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => setConfirmedBooking(null)}
-                  className="px-6 py-3 text-sm font-semibold text-white bg-neutral-950 dark:bg-[#1D72B8] hover:bg-neutral-800 dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] rounded-xl min-h-[44px] cursor-pointer transition-colors"
+                  className="px-6 py-3 text-sm sm:text-base font-semibold text-white bg-neutral-950 dark:bg-[#1D72B8] hover:bg-neutral-800 dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] rounded-xl min-h-[44px] cursor-pointer transition-colors"
                 >
                   {t.booking.newBooking}
                 </button>
@@ -316,7 +316,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 {errorMsg && (
                   <div
                     role="alert"
-                    className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-transparent dark:border-red-900 text-xs font-medium text-red-700 dark:text-red-300"
+                    className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-transparent dark:border-red-900 text-sm font-medium text-red-700 dark:text-red-300"
                   >
                     {errorMsg}
                   </div>
@@ -326,7 +326,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                   <div>
                     <label
                       htmlFor="booking-date"
-                      className="block text-xs font-medium text-neutral-600 dark:text-slate-300 mb-1"
+                      className="block text-sm font-medium text-neutral-600 dark:text-slate-300 mb-1"
                     >
                       {t.booking.dateLabel}
                     </label>
@@ -338,14 +338,14 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                         min={todayStr}
                         value={preferredDate}
                         onChange={(e) => setPreferredDate(e.target.value)}
-                        className="w-full ps-10 pe-3.5 py-2.5 text-sm bg-slate-50 dark:bg-[#0B1724] border border-slate-200 dark:border-slate-700 rounded-xl text-[#132C40] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#132C40] dark:focus:ring-[#2E96D8] min-h-[44px] tabular-nums"
+                        className="w-full ps-10 pe-3.5 py-2.5 text-sm sm:text-base bg-slate-50 dark:bg-[#0B1724] border border-slate-200 dark:border-slate-700 rounded-xl text-[#132C40] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#132C40] dark:focus:ring-[#2E96D8] min-h-[44px] tabular-nums"
                       />
                     </div>
                   </div>
                   <div>
                     <label
                       htmlFor="booking-window"
-                      className="block text-xs font-medium text-neutral-600 dark:text-slate-300 mb-1"
+                      className="block text-sm font-medium text-neutral-600 dark:text-slate-300 mb-1"
                     >
                       {t.booking.windowLabel}
                     </label>
@@ -427,7 +427,7 @@ export const BookingSection: React.FC<BookingSectionProps> = ({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3.5 text-sm font-semibold text-white bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1C3D58] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] disabled:opacity-60 rounded-xl transition-colors min-h-[48px] cursor-pointer"
+                  className="w-full py-3.5 text-sm sm:text-base font-semibold text-white bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1C3D58] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] disabled:opacity-60 rounded-xl transition-colors min-h-[48px] cursor-pointer"
                 >
                   {submitting
                     ? t.booking.confirming

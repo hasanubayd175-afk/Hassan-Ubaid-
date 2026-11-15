@@ -161,6 +161,7 @@ export interface TranslationPack {
     catAll: string;
     catEngineering: string;
     catVideoReels: string;
+    catFaqs: string;
     catMep: string;
     catBuild: string;
     catSecurityIt: string;
@@ -312,6 +313,27 @@ export interface TranslationPack {
     quickPromptPlaceholder: string;
     scanQr: string;
     hotlineSuffix: string;
+  };
+  faq: {
+    eyebrow: string;
+    headingPrefix: string;
+    headingSuffix: string;
+    subtitle: string;
+    allCategories: string;
+    categories: {
+      compliance: string;
+      operations: string;
+      methodology: string;
+    };
+    ctaPrompt: string;
+    ctaButton: string;
+    items: Array<{
+      id: string;
+      category: 'compliance' | 'operations' | 'methodology';
+      badge: string;
+      question: string;
+      answer: string;
+    }>;
   };
 }
 
@@ -528,6 +550,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       catAll: 'All 13',
       catEngineering: 'Engineering Services & Solutions',
       catVideoReels: 'Partner Video Reels & Field Results',
+      catFaqs: 'FAQs & Compliance',
       catMep: 'MEP',
       catBuild: 'Build',
       catSecurityIt: 'Security & IT',
@@ -704,6 +727,104 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       quickPromptPlaceholder: 'Ask about HVAC, plumbing, SLA...',
       scanQr: 'Scan QR Code',
       hotlineSuffix: '24/7 Hotline',
+    },
+    faq: {
+      eyebrow: 'Frequently Asked Questions',
+      headingPrefix: 'MEP Compliance, Regional Ops',
+      headingSuffix: 'Service Methodology',
+      subtitle:
+        'Direct engineering answers covering statutory certifications across London, Germany & Dubai, 24/7 SLA dispatch protocols, and preventive maintenance workflows.',
+      allCategories: 'All Topics',
+      categories: {
+        compliance: 'MEP Compliance',
+        operations: 'Regional Operations',
+        methodology: 'Service Methodology',
+      },
+      ctaPrompt: 'Need site-specific compliance documentation or an SLA audit?',
+      ctaButton: 'Book Engineering Consultation',
+      items: [
+        {
+          id: 'faq-certs',
+          category: 'compliance',
+          badge: 'NICEIC · VDE · DEWA',
+          question:
+            'Which regional MEP and statutory compliance certifications do Kelvix engineers hold?',
+          answer:
+            'Every field engineer operates under region-specific statutory licenses: NICEIC, CIBSE, SafeContractor, Gas Safe, and F-Gas in London (UK); TÜV, VDE 0105, DIN EN, and DGUV V3 in Germany (DACH); and DEWA, SIRA, and Dubai Civil Defense (DCD) approvals in Dubai (UAE), all governed under ISO 9001, ISO 41001, and ISO 45001.',
+        },
+        {
+          id: 'faq-audit-logs',
+          category: 'compliance',
+          badge: 'CAFM Audit Trail',
+          question:
+            'Do you issue digital test certificates and auditable compliance packs after each inspection?',
+          answer:
+            'Yes. Every preventive inspection or capital retrofit produces a timestamped digital handover dossier containing EICR electrical test sheets, VDE 0105 thermal/insulation logs, F-Gas refrigerant balance records, or DCD/DEWA safety sign-offs, synced directly to your CAFM portal.',
+        },
+        {
+          id: 'faq-live-isolation',
+          category: 'compliance',
+          badge: 'Zero-Downtime LOTO',
+          question:
+            'How are HV/LV switchgear works and chiller overhauls completed without disrupting live commercial buildings?',
+          answer:
+            'Our lead engineers execute strict Lock-Out/Tag-Out (LOTO) and Permit-to-Work (PTW) procedures during scheduled out-of-hours windows, deploying temporary N+1 bypass cooling or standby power bridging so retail floors, trading desks, and critical tenants stay online.',
+        },
+        {
+          id: 'faq-sla-speed',
+          category: 'operations',
+          badge: '45–60 Min SLA',
+          question:
+            'How fast can Kelvix dispatch certified mobile engineers across London, Germany, and Dubai?',
+          answer:
+            'Our strategically positioned mobile hubs in Bishopsgate (London), Frankfurt & Munich (Germany), and Downtown Boulevard Plaza (Dubai) deliver a contracted 45–60 minute priority emergency arrival SLA, backed by 24/7 tri-region dispatch control.',
+        },
+        {
+          id: 'faq-multi-region',
+          category: 'operations',
+          badge: 'Unified Tri-Region MSA',
+          question:
+            'Can international asset owners manage UK, German, and UAE portfolios under one contract?',
+          answer:
+            'Yes. Multi-country landlords and retail groups consolidate all three regions under a single Master Service Agreement with unified SLA reporting, while retaining localized statutory compliance, bilingual engineering leads, and regional currency billing (GBP, EUR, AED).',
+        },
+        {
+          id: 'faq-inhouse-workforce',
+          category: 'operations',
+          badge: '180+ Specialists',
+          question:
+            'Are field technicians directly employed by Kelvix Solutions or outsourced to brokers?',
+          answer:
+            'Kelvix Solutions maintains 180+ full-time, security-vetted, trade-licensed engineers and technicians across our three operating hubs. Specialized OEM chiller or elevator tasks are only executed alongside our directly supervising Regional Lead Engineer.',
+        },
+        {
+          id: 'faq-milestone-math',
+          category: 'methodology',
+          badge: '99.4% Verified SLA',
+          question:
+            'How do you measure and audit your 99.4% SLA adherence and delivery milestones?',
+          answer:
+            'All operational KPIs are audited over a rolling 12-month CMMS window using GPS-verified engineer arrival timestamps, formal client sign-offs in our tri-region ERP since 2016 (1,400+ projects), and gross internal square meters registered in CAFM (1.8M+ sqm).',
+        },
+        {
+          id: 'faq-ppm-workflow',
+          category: 'methodology',
+          badge: 'SFG20 & VDMA 24186',
+          question:
+            'What predictive diagnostics are included in your Preventive Maintenance (PPM) methodology?',
+          answer:
+            'We align maintenance calendars with SFG20 and VDMA 24186 benchmarks, combining infrared thermography on distribution boards, ultrasonic bearing vibration analysis, BMS telemetry alerts, and seasonal chilled-water chemical dosing to prevent failures before downtime occurs.',
+        },
+        {
+          id: 'faq-warranty-qa',
+          category: 'methodology',
+          badge: '12–24 Mo Warranty',
+          question:
+            'What quality assurance sign-off and workmanship warranty cover completed projects?',
+          answer:
+            'Every completed MEP installation, build fit-out, or technical repair undergoes dual-stage sign-off by a Regional Lead Engineer before client handover and carries a 12 to 24-month workmanship warranty backed by full SLA remediation guarantees.',
+        },
+      ],
     },
   },
 
@@ -919,6 +1040,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       catAll: 'Alle 13',
       catEngineering: 'Engineering Services & Solutions',
       catVideoReels: 'Partner Video Reels & Praxisergebnisse',
+      catFaqs: 'FAQ & Compliance',
       catMep: 'TGA / MEP',
       catBuild: 'Bau & Ausbau',
       catSecurityIt: 'Sicherheit & IT',
@@ -1095,6 +1217,104 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       quickPromptPlaceholder: 'Fragen zu HLK, Sanitär, SLA...',
       scanQr: 'QR-Code scannen',
       hotlineSuffix: '24/7 Notruf',
+    },
+    faq: {
+      eyebrow: 'Häufig gestellte Fragen',
+      headingPrefix: 'TGA-Compliance, Regionalbetrieb',
+      headingSuffix: 'Service-Methodik',
+      subtitle:
+        'Klare technische Antworten zu gesetzlichen Zulassungen in London, Deutschland & Dubai, unseren 24/7-Einsatzzeiten und der vorausschauenden Wartungsmethodik.',
+      allCategories: 'Alle Themen',
+      categories: {
+        compliance: 'TGA-Compliance',
+        operations: 'Regionalbetrieb',
+        methodology: 'Service-Methodik',
+      },
+      ctaPrompt: 'Benötigen Sie standortspezifische Nachweise oder ein SLA-Audit?',
+      ctaButton: 'Ingenieurberatung buchen',
+      items: [
+        {
+          id: 'faq-certs',
+          category: 'compliance',
+          badge: 'NICEIC · VDE · DEWA',
+          question:
+            'Über welche regionalen TGA- und Sicherheitszertifizierungen verfügen Ihre Ingenieure?',
+          answer:
+            'Jeder Techniker arbeitet mit gültigen Landeslizenzen: NICEIC, CIBSE, SafeContractor und F-Gas in London (UK); TÜV, VDE 0105, DIN EN und DGUV V3 in Deutschland (DACH); sowie DEWA-, SIRA- und DCD-Zulassungen in Dubai (VAE) – gesteuert nach ISO 9001, 41001 und 45001.',
+        },
+        {
+          id: 'faq-audit-logs',
+          category: 'compliance',
+          badge: 'CAFM-Prüfpfad',
+          question:
+            'Erhalten wir nach jeder Wartung revisionssichere Prüfprotokolle und Zertifikate?',
+          answer:
+            'Ja. Jede Prüfung erzeugt ein digitales Übergabeprotokoll mit Zeitstempel – inklusive DGUV V3 / VDE 0105-Messwerten, Thermografie-Aufnahmen, Kältemittel-Logbüchern und DEWA-/UK-Compliance-Nachweisen direkt in Ihrem CAFM-Portal.',
+        },
+        {
+          id: 'faq-live-isolation',
+          category: 'compliance',
+          badge: 'Unterbrechungsfreies LOTO',
+          question:
+            'Wie werden Schaltanlagen- und Kältearbeiten im laufenden Gebäudebetrieb durchgeführt?',
+          answer:
+            'Unsere leitenden Ingenieure arbeiten nach strengen LOTO- und Freigabeprozessen außerhalb der Geschäftszeiten und setzen bei Bedarf redundante N+1-Notkühlung oder Notstrombrücken ein.',
+        },
+        {
+          id: 'faq-sla-speed',
+          category: 'operations',
+          badge: '45–60 Min. SLA',
+          question:
+            'Wie schnell sind Ihre 24/7-Einsatzteams in London, Deutschland und Dubai vor Ort?',
+          answer:
+            'Unsere Standorte in London-Bishopsgate, Frankfurt & München sowie Downtown Dubai garantieren vertraglich eine Notfall-Ankunftszeit von 45–60 Minuten rund um die Uhr.',
+        },
+        {
+          id: 'faq-multi-region',
+          category: 'operations',
+          badge: 'Drei-Regionen-Rahmenvertrag',
+          question:
+            'Können internationale Bestandshalter UK, Deutschland und die VAE über einen Vertrag steuern?',
+          answer:
+            'Ja. Über einen einheitlichen Master Service Agreement erhalten Sie konsolidierte KPI-Reports bei vollständiger lokaler Normerfüllung und Abrechnung in GBP, EUR oder AED.',
+        },
+        {
+          id: 'faq-inhouse-workforce',
+          category: 'operations',
+          badge: '180+ Festangestellte',
+          question:
+            'Setzt Kelvix eigenes Fachpersonal ein oder wird an Subunternehmer vermittelt?',
+          answer:
+            'Wir beschäftigen über 180 festangestellte, sicherheitsgeprüfte Fachingenieure und Monteure. Spezialisierte OEM-Arbeiten erfolgen stets unter direkter Bauleitung unserer regionalen Chefingenieure.',
+        },
+        {
+          id: 'faq-milestone-math',
+          category: 'methodology',
+          badge: '99,4 % Verifizierter SLA',
+          question:
+            'Wie werden die 99,4 % SLA-Einhaltung und die Projekt-Meilensteine genau berechnet?',
+          answer:
+            'Alle Kennzahlen basieren auf einem rollierenden 12-Monats-CMMS-Audit mit GPS-Ankunftsstempeln, abgenommenen ERP-Projekten seit 2016 (1.400+) und im CAFM registrierten Bruttoflächen (1,8 Mio.+ m²).',
+        },
+        {
+          id: 'faq-ppm-workflow',
+          category: 'methodology',
+          badge: 'VDMA 24186 & SFG20',
+          question:
+            'Welche vorausschauenden Diagnosen umfasst Ihre präventive Wartungsmethodik?',
+          answer:
+            'Wir kombinieren Wartungspläne nach VDMA 24186 und SFG20 mit Infrarot-Thermografie an Verteilern, Schwingungsmessung an Lagern, GLT-Telemetrie und Kältewasser-Analytik zur Ausfallvermeidung.',
+        },
+        {
+          id: 'faq-warranty-qa',
+          category: 'methodology',
+          badge: '12–24 Mon. Gewährleistung',
+          question:
+            'Welche Qualitätsabnahme und Gewährleistung gelten für ausgeführte Arbeiten?',
+          answer:
+            'Jede Maßnahme durchläuft eine zweistufige Prüfung durch einen Regional Lead Engineer vor Kundenabnahme und beinhaltet 12 bis 24 Monate Gewährleistung.',
+        },
+      ],
     },
   },
 
@@ -1310,6 +1530,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       catAll: 'الكل (13)',
       catEngineering: 'الخدمات والحلول الهندسية',
       catVideoReels: 'فيديوهات الشركاء والنتائج الميدانية',
+      catFaqs: 'الأسئلة الشائعة والامتثال',
       catMep: 'الكهروميكانيك',
       catBuild: 'الإنشاءات',
       catSecurityIt: 'الأمن والتقنية',
@@ -1486,6 +1707,104 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       quickPromptPlaceholder: 'اسأل عن التكييف أو السباكة أو الأسعار...',
       scanQr: 'مسح رمز QR',
       hotlineSuffix: 'خط الطوارئ 24/7',
+    },
+    faq: {
+      eyebrow: 'الأسئلة الشائعة',
+      headingPrefix: 'امتثال MEP والعمليات الإقليمية',
+      headingSuffix: 'ومنهجية العمل',
+      subtitle:
+        'إجابات هندسية واضحة حول الاعتمادات التنظيمية في لندن وألمانيا ودبي، وسرعة الاستجابة على مدار الساعة، وبروتوكولات الصيانة الوقائية.',
+      allCategories: 'جميع المواضيع',
+      categories: {
+        compliance: 'امتثال الأنظمة (MEP)',
+        operations: 'العمليات الإقليمية',
+        methodology: 'منهجية الخدمة',
+      },
+      ctaPrompt: 'هل تحتاج إلى ملف امتثال خاص بموقعك أو تدقيق لاتفاقية مستوى الخدمة؟',
+      ctaButton: 'احجز استشارة هندسية',
+      items: [
+        {
+          id: 'faq-certs',
+          category: 'compliance',
+          badge: 'NICEIC · VDE · DEWA',
+          question:
+            'ما هي الاعتمادات الهندسية والتنظيمية التي يحملها مهندسو كيلفكس في كل منطقة؟',
+          answer:
+            'يعمل كل مهندس ميداني تحت تراخيص بلده المعتمدة: NICEIC و CIBSE و SafeContractor و F-Gas في لندن؛ و TÜV و VDE 0105 و DIN EN و DGUV V3 في ألمانيا؛ واعتمادات هيئة كهرباء ومياه دبي (DEWA) و SIRA والدفاع المدني بدبي (DCD)، ضمن حوكمة ISO 9001 و 41001 و 45001.',
+        },
+        {
+          id: 'faq-audit-logs',
+          category: 'compliance',
+          badge: 'سجل تدقيق CAFM',
+          question:
+            'هل تقدمون شهادات فحص رقمية وسجلات امتثال موثقة بعد كل عملية تدقيق؟',
+          answer:
+            'نعم، تصدر بعد كل فحص وقائي أو مشروع تحديث حزمة تسليم رقمية مختومة بالتوقيت تتضمن تقارير الفحص الكهربائي، وسجلات الفحص الحراري، وتوازن غازات التبريد F-Gas، وموافقات DEWA/DCD متزامنة مع نظام CAFM.',
+        },
+        {
+          id: 'faq-live-isolation',
+          category: 'compliance',
+          badge: 'عزل آمن بدون توقف',
+          question:
+            'كيف يتم تنفيذ أعمال لوحات الجهد العالي والمبردات دون تعطيل تشغيل المباني التجارية؟',
+          answer:
+            'ينفذ مهندسونا إجراءات العزل الآمن (LOTO) وتصاريح العمل خارج ساعات الذروة، مع توفير وحدات تبريد احتياطية N+1 أو توصيلات طاقة مؤقتة لضمان استمرارية عمل المرافق التجارية دون انقطاع.',
+        },
+        {
+          id: 'faq-sla-speed',
+          category: 'operations',
+          badge: 'استجابة 45–60 دقيقة',
+          question:
+            'ما هي سرعة استجابة فرق الطوارئ الميدانية في لندن وألمانيا ودبي؟',
+          answer:
+            'تضمن مراكزنا الميدانية في مدينة لندن وفرانكفورت وميونخ ووسط مدينة دبي وصول المهندس المعتمد خلال 45 إلى 60 دقيقة للحالات الطارئة على مدار الساعة.',
+        },
+        {
+          id: 'faq-multi-region',
+          category: 'operations',
+          badge: 'عقد موحد لـ 3 مناطق',
+          question:
+            'هل يمكن لملاك الأصول الدوليين إدارة عقاراتهم في بريطانيا وألمانيا والإمارات بعقد واحد؟',
+          answer:
+            'نعم، نوفر اتفاقية خدمة رئيسية موحدة (MSA) تجمع تقارير الأداء الإقليمية تحت لوحة واحدة مع الالتزام التام بالقوانين المحلية وإصدار الفواتير بالعملة المحلية (GBP / EUR / AED).',
+        },
+        {
+          id: 'faq-inhouse-workforce',
+          category: 'operations',
+          badge: '+180 مهندساً متفرغاً',
+          question:
+            'هل يعمل الفنيون بشكل مباشر لدى كيلفكس أم عبر وسطاء خارجيين؟',
+          answer:
+            'تضم كيلفكس أكثر من 180 مهندساً وفنياً متفرغاً ومرخصاً ومفحوصاً أمنياً في المراكز الثلاثة، وأي أعمال متخصصة للمصنعين تتم تحت الإشراف المباشر لمهندسنا القيادي الإقليمي.',
+        },
+        {
+          id: 'faq-milestone-math',
+          category: 'methodology',
+          badge: 'التزام SLA بنسبة 99.4%',
+          question:
+            'كيف يتم احتساب نسبة الالتزام 99.4% وإنجازات المشاريع المنشورة؟',
+          answer:
+            'تُدقق مؤشرات الأداء عبر نظام CMMS خلال آخر 12 شهراً باستخدام بصمة الوصول عبر GPS، وبمراجعة أوامر العمل الموقعة في نظام ERP منذ 2016 (+1,400 مشروع) وسجل المساحات في CAFM (+1.8 مليون م²).',
+        },
+        {
+          id: 'faq-ppm-workflow',
+          category: 'methodology',
+          badge: 'معايير SFG20 & VDMA',
+          question:
+            'ما الفحوصات الاستباقية التي يشملها برنامج الصيانة الوقائية (PPM)؟',
+          answer:
+            'ندمج جداول SFG20 و VDMA 24186 مع التصوير الحراري بالأشعة تحت الحمراء للوحات الكهربائية، وتحليل الاهتزازات للمحركات، وتنبيهات أنظمة إدارة المباني BMS لمنع الأعطال قبل حدوثها.',
+        },
+        {
+          id: 'faq-warranty-qa',
+          category: 'methodology',
+          badge: 'ضمان 12–24 شهراً',
+          question:
+            'ما هي ضمانات جودة التنفيذ واعتماد التسليم بعد انتهاء الأعمال؟',
+          answer:
+            'يخضع كل مشروع أو إصلاح فني لتدقيق مزدوج واعتماد من المهندس القيادي الإقليمي قبل التسليم، ويشمل ضماناً على جودة التنفيذ لمدة 12 إلى 24 شهراً حسب التخصص.',
+        },
+      ],
     },
   },
 };

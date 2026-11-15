@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface ClientLogoItem {
@@ -45,6 +46,7 @@ const MARQUEE_ITEMS = [...MARQUEE_HALF, ...MARQUEE_HALF];
 export const PartnerSliderSection: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const trackContainerRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   const { t } = useLanguage();
 
   const scrollByStep = (direction: -1 | 1) => {
@@ -62,14 +64,20 @@ export const PartnerSliderSection: React.FC = () => {
       aria-label="Our Clients and Strategic Partners"
       className="min-h-[420px] md:min-h-[460px] flex flex-col justify-center py-14 md:py-16 bg-[#EBF1F8] dark:bg-[#0B1724] text-[#132C40] dark:text-slate-100 overflow-hidden transition-colors duration-200"
     >
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-10">
+      <motion.div
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 22 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-10"
+      >
         <div className="mx-auto max-w-3xl text-center">
           <div className="flex items-center justify-center gap-3.5 mb-2.5">
             <span
               className="w-10 h-px bg-gradient-to-r from-transparent to-[#D49A4A]"
               aria-hidden="true"
             />
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#1D72B8] dark:text-[#2E96D8]">
+            <p className="text-sm font-semibold tracking-[0.18em] uppercase text-[#1D72B8] dark:text-[#2E96D8]">
               {t.partners.eyebrow}
             </p>
             <span
@@ -112,7 +120,7 @@ export const PartnerSliderSection: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Full-Bleed Fitted Round Client Logo Medallions */}
       <div
@@ -140,10 +148,10 @@ export const PartnerSliderSection: React.FC = () => {
                 />
               </div>
               <div className="space-y-0.5">
-                <h3 className="font-display text-sm sm:text-base font-bold text-[#132C40] dark:text-white tracking-tight">
+                <h3 className="font-display text-base sm:text-lg font-bold text-[#132C40] dark:text-white tracking-tight">
                   {client.name}
                 </h3>
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
                   {client.sector}
                 </p>
               </div>

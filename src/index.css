@@ -12,6 +12,45 @@
   html {
     font-family: var(--font-sans);
     scroll-padding-top: 72px;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(29, 114, 184, 0.45) transparent;
+  }
+
+  html.dark {
+    scrollbar-color: rgba(212, 154, 74, 0.4) rgba(7, 17, 28, 0.6);
+  }
+
+  html::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: rgba(29, 114, 184, 0.42);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  html::-webkit-scrollbar-thumb:hover {
+    background: rgba(29, 114, 184, 0.72);
+    background-clip: content-box;
+  }
+
+  html.dark::-webkit-scrollbar-thumb {
+    background: rgba(212, 154, 74, 0.38);
+    background-clip: content-box;
+  }
+
+  html.dark::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 154, 74, 0.68);
+    background-clip: content-box;
   }
 
   h1, h2, h3, .font-display {
@@ -24,6 +63,12 @@
 
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 

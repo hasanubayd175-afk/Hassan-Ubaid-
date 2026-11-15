@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Building2, ShieldCheck, Wrench } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { IMAGES } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ResilientImage } from './ResilientImage';
@@ -89,6 +90,7 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
   onOpenBooking,
 }) => {
   const [featuredId, setFeaturedId] = useState<string>('mep');
+  const prefersReducedMotion = useReducedMotion();
   const { t } = useLanguage();
 
   return (
@@ -96,15 +98,21 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
       id="strategic-pillars"
       className="bg-[#EBF1F8] dark:bg-[#0B1724] text-[#132C40] dark:text-slate-100 min-h-[480px] md:min-h-[520px] flex items-center py-14 md:py-16 transition-colors duration-200"
     >
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.12 }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8"
+      >
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-12">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#1D72B8] dark:text-[#2E96D8] mb-2">
+          <p className="text-sm font-semibold tracking-[0.2em] uppercase text-[#1D72B8] dark:text-[#2E96D8] mb-2">
             {t.pillars.eyebrow}
           </p>
           <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#132C40] dark:text-white [text-wrap:balance]">
             {t.pillars.heading}
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed">
             {t.pillars.subtitle}
           </p>
         </div>
@@ -153,7 +161,7 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
                       >
                         {pillar.icon}
                       </span>
-                      <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-sm">
+                      <span className="text-sm sm:text-base font-semibold text-white drop-shadow-sm">
                         {localized.badge}
                       </span>
                     </div>
@@ -161,7 +169,7 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
 
                   {/* Title & Summary */}
                   <h3
-                    className={`font-display text-lg sm:text-xl font-bold tracking-tight mb-2 transition-colors ${
+                    className={`font-display text-xl sm:text-2xl font-bold tracking-tight mb-2 transition-colors ${
                       isHighlighted
                         ? 'text-[#1D72B8] dark:text-[#2E96D8]'
                         : 'text-[#132C40] dark:text-white'
@@ -169,19 +177,19 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
                   >
                     {localized.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
                     {localized.description}
                   </p>
 
                   {/* 3 Clean Bullets */}
-                  <ul className="space-y-2 mb-5">
+                  <ul className="space-y-2.5 mb-5">
                     {localized.bullets.map((bullet) => (
                       <li
                         key={bullet}
-                        className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300"
+                        className="flex items-start gap-2.5 text-sm sm:text-base text-slate-700 dark:text-slate-300"
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                          className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${
                             isHighlighted ? 'bg-[#1D72B8] dark:bg-[#2E96D8]' : 'bg-[#D49A4A]'
                           }`}
                           aria-hidden="true"
@@ -200,7 +208,7 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
                       ? onOpenBooking(pillar.serviceId)
                       : onOpenServices(pillar.serviceId)
                   }
-                  className={`pt-4 border-t border-slate-100 dark:border-slate-800 w-full flex items-center justify-between text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
+                  className={`pt-4 border-t border-slate-100 dark:border-slate-800 w-full flex items-center justify-between text-sm sm:text-base font-semibold transition-colors cursor-pointer ${
                     isHighlighted
                       ? 'text-[#1D72B8] dark:text-[#2E96D8]'
                       : 'text-[#132C40] dark:text-slate-200 group-hover:text-[#1D72B8] dark:group-hover:text-[#2E96D8]'
@@ -213,7 +221,7 @@ export const StrategicPillarsSection: React.FC<StrategicPillarsSectionProps> = (
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

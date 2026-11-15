@@ -14,6 +14,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { RegionId } from '../types/kelvis';
 import { GlobalOfficesMap } from './GlobalOfficesMap';
 import { ResilientImage } from './ResilientImage';
+import { scrollToTopSmooth } from '../utils/smoothScroll';
 
 interface LocationsFooterProps {
   selectedRegionId: RegionId;
@@ -102,7 +103,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
   const activeHubPhoto = HUB_PHOTOS[activeOffice.id] || IMAGES.londonHub;
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTopSmooth();
   };
 
   return (
@@ -118,7 +119,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
               className="w-10 h-px bg-gradient-to-r from-transparent to-[#D49A4A]"
               aria-hidden="true"
             />
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#2E96D8]">
+            <p className="text-sm font-semibold tracking-[0.18em] uppercase text-[#2E96D8]">
               {t.footer.eyebrow}
             </p>
             <span
@@ -152,7 +153,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
                       onSelectRegion(office.id);
                       setFocusTrigger((n) => n + 1);
                     }}
-                    className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                       active
                         ? 'bg-[#1D72B8] text-white shadow-xs'
                         : 'text-slate-300 hover:text-white'
@@ -167,7 +168,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
             <button
               type="button"
               onClick={() => onBookInRegion(activeOffice.id)}
-              className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[#D49A4A] hover:bg-[#c18739] text-[#0E2233] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm whitespace-nowrap shrink-0"
+              className="px-4.5 py-2.5 text-sm font-bold rounded-xl bg-[#D49A4A] hover:bg-[#c18739] text-[#0E2233] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm whitespace-nowrap shrink-0"
             >
               <span>
                 {t.footer.bookPrefix} {getRegionName(activeOffice.id)}
@@ -227,31 +228,31 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
             <div className="p-6 flex-1 flex flex-col justify-between gap-5">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-[#2E96D8] shrink-0 mt-0.5" />
-                  <div className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  <MapPin className="w-4 h-4 text-[#2E96D8] shrink-0 mt-1" />
+                  <div className="text-sm sm:text-base text-slate-200 leading-relaxed">
                     <p className="font-medium text-white">
                       {activeOffice.addressLine1}
                     </p>
                     <p className="text-slate-300">{activeOffice.addressLine2}</p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-sm text-slate-400 mt-1">
                       {t.footer.coveragePrefix} {activeOffice.coverage}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <a
                     href={`tel:${activeOffice.phone.replace(/\s+/g, '')}`}
                     className="flex items-center gap-2 font-mono font-semibold text-white hover:text-[#D49A4A] tabular-nums transition-colors"
                   >
-                    <Phone className="w-3.5 h-3.5 text-[#2E96D8] shrink-0" />
+                    <Phone className="w-4 h-4 text-[#2E96D8] shrink-0" />
                     <span dir="ltr" className="truncate">{activeOffice.phone}</span>
                   </a>
                   <a
                     href={`mailto:${activeOffice.email}`}
                     className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors truncate"
                   >
-                    <Mail className="w-3.5 h-3.5 text-[#2E96D8] shrink-0" />
+                    <Mail className="w-4 h-4 text-[#2E96D8] shrink-0" />
                     <span dir="ltr" className="truncate">{activeOffice.email}</span>
                   </a>
                 </div>
@@ -262,18 +263,18 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
                   href={externalMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="py-2.5 px-4 rounded-xl border border-white/15 bg-[#0E2233] hover:bg-[#1D72B8] text-slate-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                  className="py-2.5 px-4 rounded-xl border border-white/15 bg-[#0E2233] hover:bg-[#1D72B8] text-slate-200 hover:text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
                 >
                   <span>{t.footer.openInMaps}</span>
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  <ExternalLink className="w-4 h-4 shrink-0" />
                 </a>
                 <button
                   type="button"
                   onClick={() => onBookInRegion(activeOffice.id)}
-                  className="py-2.5 px-4 rounded-xl bg-[#D49A4A] hover:bg-[#c18739] text-[#0E2233] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+                  className="py-2.5 px-4 rounded-xl bg-[#D49A4A] hover:bg-[#c18739] text-[#0E2233] text-sm font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <span>{t.footer.scheduleDispatch}</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
+                  <ArrowUpRight className="w-4 h-4 shrink-0" />
                 </button>
               </div>
             </div>
@@ -283,10 +284,10 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
         {/* Discreet Editorial Newsletter Subscription Strip */}
         <div className="pt-8 border-t border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-7 space-y-1.5">
-            <p className="text-[10px] font-semibold tracking-[0.24em] uppercase text-[#D49A4A]">
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#D49A4A]">
               {t.footer.newsletterEyebrow}
             </p>
-            <h3 className="font-display text-lg sm:text-xl font-semibold tracking-tight text-white [text-wrap:balance]">
+            <h3 className="font-display text-xl sm:text-2xl font-semibold tracking-tight text-white [text-wrap:balance]">
               {t.footer.newsletterTitlePrefix}{' '}
               <span className="font-quote italic font-normal text-[#D49A4A] text-[1.12em] px-0.5">
                 {t.footer.newsletterTitleEmphasis}
@@ -296,7 +297,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
               </span>{' '}
               {t.footer.newsletterTitleSuffix}
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+            <p className="text-sm text-slate-300 leading-relaxed max-w-xl">
               {t.footer.newsletterDescription}
             </p>
           </div>
@@ -305,7 +306,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
             {newsletterStatus === 'subscribed' || newsletterStatus === 'already' ? (
               <div
                 role="status"
-                className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-[#132C40]/80 border border-emerald-400/30 text-xs text-emerald-200"
+                className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-[#132C40]/80 border border-emerald-400/30 text-sm text-emerald-200"
               >
                 <span className="inline-flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -318,7 +319,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => setNewsletterStatus('idle')}
-                  className="text-[11px] font-semibold text-slate-300 hover:text-white underline underline-offset-4 cursor-pointer shrink-0"
+                  className="text-xs font-semibold text-slate-300 hover:text-white underline underline-offset-4 cursor-pointer shrink-0"
                 >
                   ×
                 </button>
@@ -343,23 +344,23 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
                       }
                     }}
                     placeholder={t.footer.newsletterPlaceholder}
-                    className="flex-1 min-w-0 bg-transparent px-1 py-2 text-xs sm:text-sm font-light tracking-wide text-white placeholder:text-slate-500 focus:outline-none"
+                    className="flex-1 min-w-0 bg-transparent px-1 py-2 text-sm sm:text-base font-light tracking-wide text-white placeholder:text-slate-500 focus:outline-none"
                   />
                   <button
                     type="submit"
                     disabled={newsletterStatus === 'submitting'}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#132C40] hover:bg-[#D49A4A] text-slate-100 hover:text-[#0E2233] border border-white/15 hover:border-[#D49A4A] text-[11px] font-semibold tracking-[0.14em] uppercase transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#132C40] hover:bg-[#D49A4A] text-slate-100 hover:text-[#0E2233] border border-white/15 hover:border-[#D49A4A] text-xs sm:text-sm font-semibold tracking-[0.12em] uppercase transition-colors cursor-pointer disabled:opacity-60 whitespace-nowrap shrink-0"
                   >
                     <span>
                       {newsletterStatus === 'submitting'
                         ? t.footer.newsletterSubmitting
                         : t.footer.newsletterButton}
                     </span>
-                    <ArrowRight className="w-3 h-3 shrink-0" />
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                   </button>
                 </div>
                 {newsletterStatus === 'error' && newsletterError && (
-                  <p role="alert" className="text-[11px] text-amber-300">
+                  <p role="alert" className="text-xs text-amber-300">
                     {newsletterError}
                   </p>
                 )}
@@ -369,7 +370,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
         </div>
 
         {/* Quiet Navigation, Social & Copyright Footer Bar */}
-        <div className="pt-6 border-t border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 text-xs text-slate-400">
+        <div className="pt-6 border-t border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 text-sm text-slate-400">
           <p>
             © {new Date().getFullYear()} {t.footer.copyrightPrefix}{' '}
             <span className="font-quote italic font-semibold text-[#D49A4A]">
@@ -380,7 +381,7 @@ export const LocationsFooter: React.FC<LocationsFooterProps> = ({
 
           <nav
             aria-label="Footer navigation"
-            className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-slate-300"
+            className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-slate-300"
           >
             <button
               type="button"

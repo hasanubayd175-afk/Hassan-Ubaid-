@@ -6,12 +6,14 @@ import {
   Star,
   X,
 } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { INITIAL_REVIEWS, SERVICES } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { CustomerReview, RegionId } from '../types/kelvis';
 
 export const ReviewsSection: React.FC = () => {
   const { t } = useLanguage();
+  const prefersReducedMotion = useReducedMotion();
   const [reviews, setReviews] = useState<CustomerReview[]>(INITIAL_REVIEWS);
   const [regionFilter, setRegionFilter] = useState<'all' | RegionId>('all');
   const [spotlightIndex, setSpotlightIndex] = useState(0);
@@ -105,14 +107,20 @@ export const ReviewsSection: React.FC = () => {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(29,114,184,0.12),_transparent_52%),radial-gradient(circle_at_bottom_left,_rgba(212,154,74,0.14),_transparent_52%)]"
       />
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.12 }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8"
+      >
         <div className="mx-auto max-w-3xl text-center mb-10 md:mb-12">
           <div className="flex items-center justify-center gap-3.5 mb-3">
             <span
               className="w-10 h-px bg-gradient-to-r from-transparent to-[#D49A4A]"
               aria-hidden="true"
             />
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#1D72B8] dark:text-[#2E96D8]">
+            <p className="text-sm font-semibold tracking-[0.18em] uppercase text-[#1D72B8] dark:text-[#2E96D8]">
               {t.reviews.eyebrowPrefix} · {averageRating}
               {t.reviews.ratingSuffix}
             </p>
@@ -154,7 +162,7 @@ export const ReviewsSection: React.FC = () => {
                       setRegionFilter(tab.id);
                       setSpotlightIndex(0);
                     }}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap min-h-[36px] cursor-pointer ${
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap min-h-[38px] cursor-pointer ${
                       active
                         ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white'
                         : 'text-slate-600 dark:text-slate-300 hover:text-[#132C40] dark:hover:text-white'
@@ -169,7 +177,7 @@ export const ReviewsSection: React.FC = () => {
             <button
               type="button"
               onClick={() => setFormOpen(true)}
-              className="px-4 py-2 text-xs font-semibold text-white bg-[#1D72B8] hover:bg-[#132C40] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] rounded-lg min-h-[40px] whitespace-nowrap cursor-pointer transition-colors"
+              className="px-4.5 py-2 text-sm font-semibold text-white bg-[#1D72B8] hover:bg-[#132C40] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] rounded-lg min-h-[42px] whitespace-nowrap cursor-pointer transition-colors"
             >
               {t.reviews.writeReview}
             </button>
@@ -205,10 +213,10 @@ export const ReviewsSection: React.FC = () => {
 
               <div className="pt-5 border-t border-white/15 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="font-display text-base font-bold text-white">
+                  <p className="font-display text-lg font-bold text-white">
                     {activeSpotlight.authorName}
                   </p>
-                  <p className="text-xs text-slate-300">
+                  <p className="text-sm text-slate-300">
                     {activeSpotlight.organization} · {activeSpotlight.regionLabel} ·{' '}
                     <span className="text-[#D49A4A] font-semibold">
                       {activeSpotlight.serviceName}
@@ -264,7 +272,7 @@ export const ReviewsSection: React.FC = () => {
             </article>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {formOpen && (
         <div

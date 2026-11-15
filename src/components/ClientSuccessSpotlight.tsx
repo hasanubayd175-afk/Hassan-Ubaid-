@@ -147,8 +147,8 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
               className="w-10 h-px bg-gradient-to-r from-transparent to-[#D49A4A]"
               aria-hidden="true"
             />
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#56B4EE] inline-flex items-center gap-2">
-              <Video className="w-3.5 h-3.5 text-[#D49A4A]" />
+            <p className="text-sm font-semibold tracking-[0.18em] uppercase text-[#56B4EE] inline-flex items-center gap-2">
+              <Video className="w-4 h-4 text-[#D49A4A]" />
               <span>{t.spotlight.eyebrow}</span>
             </p>
             <span
@@ -164,7 +164,7 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
             </span>{' '}
             {t.spotlight.titleSuffix}
           </h2>
-          <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
             {t.spotlight.subtitle}
           </p>
 
@@ -188,7 +188,7 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                   role="tab"
                   aria-selected={active}
                   onClick={() => handleFilterChange(tab.id)}
-                  className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap min-h-[36px] cursor-pointer ${
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap min-h-[38px] cursor-pointer ${
                     active
                       ? 'bg-[#D49A4A] text-[#0E2233] shadow-sm'
                       : 'text-slate-200 hover:text-white hover:bg-white/10'
@@ -414,33 +414,33 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
             <div className="p-5 sm:p-6 flex flex-col justify-between gap-4 flex-1">
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#56B4EE]">
+                  <span className="text-xs sm:text-sm font-semibold uppercase tracking-[0.14em] text-[#56B4EE]">
                     {activeClip.partnerName} · {activeClip.serviceTag}
                   </span>
-                  <span className="text-[11px] text-slate-300">
+                  <span className="text-xs sm:text-sm text-slate-300">
                     {activeClip.cityBadge}
                   </span>
                 </div>
-                <h3 className="font-display text-lg sm:text-xl font-bold text-white mb-2">
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-white mb-2">
                   {activeClip.clipTitle}
                 </h3>
-                <blockquote className="font-quote italic text-lg sm:text-xl text-slate-100 leading-snug">
+                <blockquote className="font-quote italic text-xl sm:text-2xl text-slate-100 leading-snug">
                   &ldquo;{activeClip.quote}&rdquo;
                 </blockquote>
               </div>
 
               <div className="pt-4 border-t border-white/12 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-display text-sm font-bold text-white">
+                  <p className="font-display text-base font-bold text-white">
                     {activeClip.speakerName}
                   </p>
-                  <p className="text-xs text-slate-300">{activeClip.speakerRole}</p>
+                  <p className="text-sm text-slate-300">{activeClip.speakerRole}</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onBookRegion(activeClip.regionId)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#D49A4A] hover:bg-white text-[#0E2233] text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                  className="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-xl bg-[#D49A4A] hover:bg-white text-[#0E2233] text-sm font-bold transition-colors cursor-pointer whitespace-nowrap shadow-sm"
                 >
                   <span>
                     {t.spotlight.bookSimilar}{' '}
@@ -448,7 +448,7 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                       ? t.regions.germany
                       : t.regions.london}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -457,10 +457,10 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
           {/* Right 5 Cols: Selectable Partner Video Reel Playlist */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-3">
             <div className="flex items-center justify-between px-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-300">
                 {t.spotlight.clipPlaylistLabel} ({visibleClips.length})
               </p>
-              <span className="text-[11px] text-[#D49A4A] font-medium">
+              <span className="text-xs sm:text-sm text-[#D49A4A] font-medium">
                 {t.regions.london} · {t.regions.germany}
               </span>
             </div>
@@ -528,21 +528,21 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                               />
                             </span>
                           )}
-                          <span className="text-[11px] font-semibold text-[#56B4EE] truncate">
+                          <span className="text-xs font-semibold text-[#56B4EE] truncate">
                             {clip.partnerName}
                           </span>
                         </span>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-white/10 text-[#D49A4A] whitespace-nowrap shrink-0">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-white/10 text-[#D49A4A] whitespace-nowrap shrink-0">
                           {clip.regionId === 'germany'
                             ? t.regions.germany
                             : t.regions.london}
                         </span>
                       </div>
 
-                      <h4 className="font-display text-sm font-bold text-white leading-snug line-clamp-1">
+                      <h4 className="font-display text-base font-bold text-white leading-snug line-clamp-1">
                         {clip.clipTitle}
                       </h4>
-                      <p className="text-[11px] text-slate-300 mt-0.5 truncate">
+                      <p className="text-xs sm:text-sm text-slate-300 mt-0.5 truncate">
                         {clip.speakerName} · {clip.outcomeMetric}
                       </p>
                     </div>
@@ -569,10 +569,10 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
           >
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#D49A4A]">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#D49A4A]">
                   {activeClip.partnerName} · {activeClip.regionLabel}
                 </p>
-                <p className="font-display text-base font-bold text-white">
+                <p className="font-display text-lg font-bold text-white">
                   {activeClip.clipTitle}
                 </p>
               </div>
@@ -597,7 +597,7 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 inset-x-5 flex items-center justify-between gap-4">
-                <p className="text-xs sm:text-sm text-white max-w-2xl bg-black/60 backdrop-blur-sm px-3.5 py-2 rounded-lg border border-white/15">
+                <p className="text-sm sm:text-base text-white max-w-2xl bg-black/60 backdrop-blur-sm px-4 py-2.5 rounded-lg border border-white/15">
                   &ldquo;{activeClip.quote}&rdquo; — {activeClip.speakerName}
                 </p>
                 <button

@@ -4,8 +4,10 @@ import {
   ArrowUpRight,
   Building2,
   Check,
+  Clock,
   Cpu,
   GitCompareArrows,
+  HelpCircle,
   LayoutGrid,
   Leaf,
   Plus,
@@ -15,10 +17,15 @@ import {
   X,
 } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
-import { ENGINEERING_SERVICE_IDS, SERVICES } from '../data/kelvisData';
+import {
+  CLIENT_SPOTLIGHT_CLIPS,
+  ENGINEERING_SERVICE_IDS,
+  SERVICES,
+} from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { RegionId, ServiceCategory, ServiceItem } from '../types/kelvis';
 import { ClientSuccessSpotlight } from './ClientSuccessSpotlight';
+import { FaqSection } from './FaqSection';
 import { ResilientImage } from './ResilientImage';
 import { ServiceComparisonTable } from './ServiceComparisonTable';
 
@@ -44,6 +51,7 @@ const CATEGORIES: {
     label: 'Partner Video Reels & Field Results',
     icon: Video,
   },
+  { id: 'faqs', label: 'FAQs & Compliance', icon: HelpCircle },
   { id: 'mep', label: 'MEP', icon: Wrench },
   { id: 'build', label: 'Build', icon: Building2 },
   { id: 'security-it', label: 'Security & IT', icon: ShieldCheck },
@@ -51,7 +59,7 @@ const CATEGORIES: {
 ];
 
 const CATEGORY_ICON_MAP: Record<
-  Exclude<ServiceCategory, 'all' | 'engineering' | 'video-reels'>,
+  Exclude<ServiceCategory, 'all' | 'engineering' | 'video-reels' | 'faqs'>,
   React.ComponentType<{ className?: string }>
 > = {
   mep: Wrench,
@@ -67,7 +75,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   activeCategory: controlledCategory,
   onChangeCategory,
 }) => {
-  const [internalCategory, setInternalCategory] = useState<ServiceCategory>('all');
+  const [internalCategory, setInternalCategory] =
+    useState<ServiceCategory>('all');
   const activeCategory = controlledCategory ?? internalCategory;
   const setActiveCategory = (nextCat: ServiceCategory) => {
     setInternalCategory(nextCat);
@@ -83,10 +92,19 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     all: t.services.catAll,
     engineering: t.services.catEngineering,
     'video-reels': t.services.catVideoReels,
+    faqs: t.services.catFaqs,
     mep: t.services.catMep,
     build: t.services.catBuild,
     'security-it': t.services.catSecurityIt,
     grounds: t.services.catGrounds,
+  };
+
+  const getTabCount = (catId: ServiceCategory): number => {
+    if (catId === 'all') return SERVICES.length;
+    if (catId === 'engineering') return ENGINEERING_SERVICE_IDS.length;
+    if (catId === 'video-reels') return CLIENT_SPOTLIGHT_CLIPS.length;
+    if (catId === 'faqs') return t.faq.items.length;
+    return SERVICES.filter((svc) => svc.category === catId).length;
   };
 
   const filteredServices = useMemo(() => {
@@ -136,9 +154,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     : {
         rest: { scale: 1, rotate: 0, y: 0 },
         hover: {
-          scale: 1.18,
-          rotate: -8,
-          y: -1.5,
+          scale: 1.15,
+          rotate: -6,
+          y: -1,
           transition: { type: 'spring' as const, stiffness: 420, damping: 16 },
         },
       };
@@ -146,6 +164,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   const isDetailCompared = detailService
     ? compareIds.includes(detailService.id)
     : false;
+
+  const isSpecialTab =
+    activeCategory === 'video-reels' || activeCategory === 'faqs';
 
   return (
     <div className="relative overflow-hidden py-8 md:py-12 bg-gradient-to-br from-[#E1ECF7] via-[#EBF1F8] to-[#DBE7F4] dark:from-[#050E18] dark:via-[#081625] dark:to-[#0B1F33] transition-colors duration-300">
@@ -160,260 +181,349 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Category Filter with Motion Hover Icons + Comparison Anchor */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div
-            role="tablist"
-            aria-label="Service categories"
-            className="inline-flex items-center gap-1.5 p-1.5 bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/15 rounded-xl overflow-x-auto no-scrollbar max-w-full shadow-sm"
-          >
-            {CATEGORIES.map((cat) => {
-              const active = activeCategory === cat.id;
-              const Icon = cat.icon;
-              return (
-                <motion.button
-                  key={cat.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setActiveCategory(cat.id)}
-                  initial="rest"
-                  whileHover="hover"
-                  whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer ${
-                    active
-                      ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-[#EBF1F8]/70 dark:hover:bg-[#132C40] hover:text-[#132C40] dark:hover:text-white'
-                  }`}
-                >
-                  <motion.span
-                    variants={iconHoverVariant}
-                    className={`inline-flex items-center justify-center shrink-0 ${
-                      active ? 'text-[#D49A4A] dark:text-white' : 'text-[#1D72B8] dark:text-[#2E96D8]'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </motion.span>
-                  <span>{categoryLabels[cat.id] || cat.label}</span>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          {activeCategory !== 'video-reels' && (
-            <div className="flex items-center gap-3">
-              <span className="hidden md:inline text-xs text-slate-500 dark:text-slate-400">
-                {t.services.selectUpTo3}
-              </span>
-              <button
-                type="button"
-                onClick={scrollToComparison}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/15 text-[#132C40] dark:text-white hover:border-[#1D72B8] dark:hover:border-[#2E96D8] shadow-sm transition-colors cursor-pointer min-h-[38px] whitespace-nowrap"
+        <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
+          {/* Vertical Category Tabs Rail (including Engineering, Video Reels & FAQs in Vertical Form) */}
+          <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-24">
+            <div className="rounded-2xl bg-white/45 dark:bg-white/10 backdrop-blur-md border border-white/60 dark:border-white/15 p-3 shadow-sm">
+              <div
+                role="tablist"
+                aria-orientation="vertical"
+                aria-label="Service categories"
+                className="flex flex-col gap-1.5"
               >
-                <GitCompareArrows className="w-4 h-4 text-[#1D72B8] dark:text-[#2E96D8]" />
-                <span>{t.services.compareSpecs}</span>
-                <span dir="ltr" className="font-mono text-[#1D72B8] dark:text-[#D49A4A] tabular-nums">
-                  ({compareIds.length}/3)
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
+                {CATEGORIES.map((cat) => {
+                  const active = activeCategory === cat.id;
+                  const Icon = cat.icon;
+                  const count = getTabCount(cat.id);
+                  return (
+                    <motion.button
+                      key={cat.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setActiveCategory(cat.id)}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
+                      className={`w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-all text-start cursor-pointer min-h-[44px] ${
+                        active
+                          ? 'bg-[#132C40] dark:bg-[#1D72B8] text-white shadow-md'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-white/10 hover:text-[#132C40] dark:hover:text-white'
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-2.5 min-w-0">
+                        <motion.span
+                          variants={iconHoverVariant}
+                          className={`inline-flex items-center justify-center shrink-0 ${
+                            active
+                              ? 'text-[#D49A4A] dark:text-white'
+                              : 'text-[#1D72B8] dark:text-[#56B4EE]'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </motion.span>
+                        <span className="truncate">
+                          {categoryLabels[cat.id] || cat.label}
+                        </span>
+                      </span>
 
-        {/* Dedicated Engineering Services & Solutions Executive Tab Panel */}
-        {activeCategory === 'engineering' && (
-          <div className="mb-6 rounded-2xl p-6 sm:p-7 bg-[#132C40]/92 dark:bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D49A4A] mb-1.5">
-                  {t.services.engineeringBanner.eyebrow}
-                </p>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-2">
-                  {t.services.engineeringBanner.title}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                  {t.services.engineeringBanner.description}
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                      <span
+                        dir="ltr"
+                        className={`font-mono text-xs font-bold px-2 py-0.5 rounded-md tabular-nums shrink-0 ${
+                          active
+                            ? 'bg-white/15 text-[#D49A4A] dark:text-white'
+                            : 'bg-slate-200/75 dark:bg-white/10 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+
+          {/* Right Content Panel */}
+          <div className="flex-1 min-w-0 w-full">
+            {!isSpecialTab && (
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-300/60 dark:border-white/10">
+                <div>
+                  <p className="font-display text-lg sm:text-xl font-bold text-[#132C40] dark:text-white">
+                    {categoryLabels[activeCategory]}
+                  </p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {t.services.selectUpTo3}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={scrollToComparison}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white/50 dark:bg-white/10 backdrop-blur-md border border-white/70 dark:border-white/15 text-[#132C40] dark:text-white hover:border-[#1D72B8] dark:hover:border-[#2E96D8] shadow-sm transition-colors cursor-pointer min-h-[42px] whitespace-nowrap"
+                >
+                  <GitCompareArrows className="w-4 h-4 text-[#1D72B8] dark:text-[#56B4EE]" />
+                  <span>{t.services.compareSpecs}</span>
                   <span
                     dir="ltr"
-                    className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/20 font-mono text-[11px] font-semibold text-[#56B4EE]"
+                    className="font-mono text-[#1D72B8] dark:text-[#D49A4A] tabular-nums"
                   >
-                    {t.services.engineeringBanner.standardsChip}
+                    ({compareIds.length}/3)
                   </span>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#D49A4A]/20 border border-[#D49A4A]/45 text-[11px] font-semibold text-[#D49A4A]">
-                    {t.services.engineeringBanner.slaChip}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => onBookService('hvac')}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#D49A4A] hover:bg-white text-[#0E2233] text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shadow-md"
-                >
-                  <span>{t.services.engineeringBanner.bookCta}</span>
-                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Partner Video Reels & Field Results Tab View */}
-        {activeCategory === 'video-reels' ? (
-          <ClientSuccessSpotlight
-            embedded
-            onBookRegion={(reg) => {
-              if (onBookRegion) {
-                onBookRegion(reg);
-              } else {
-                onBookService('hvac');
-              }
-            }}
-          />
-        ) : (
-          <>
-            {/* Glassmorphic Real-Photo Grid with Subtle Category Icon Motion + Compare Toggle */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {filteredServices.map((service) => {
-                const isSelected = selectedServiceId === service.id;
-                const isCompared = compareIds.includes(service.id);
-                const CategoryIcon =
-                  CATEGORY_ICON_MAP[
-                    service.category as Exclude<
-                      ServiceCategory,
-                      'all' | 'engineering' | 'video-reels'
-                    >
-                  ] || Wrench;
-            return (
-              <motion.div
-                key={service.id}
-                layout={!prefersReducedMotion}
-                initial="rest"
-                whileHover="hover"
-                className={`group relative rounded-2xl overflow-hidden bg-[#0E2233] border transition-all aspect-[4/3] shadow-sm hover:shadow-xl ${
-                  isCompared
-                    ? 'border-[#D49A4A] ring-2 ring-[#D49A4A]/70'
-                    : isSelected
-                      ? 'border-[#1D72B8] ring-2 ring-[#1D72B8] ring-offset-2 dark:ring-offset-[#07111C]'
-                      : 'border-white/25 dark:border-white/15'
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setDetailService(service)}
-                  aria-label={`Inspect ${service.name} details`}
-                  className="block w-full h-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  <ResilientImage
-                    src={service.image}
-                    alt={service.name}
-                    fallbackTitle={service.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0E2233]/85 via-[#0E2233]/20 to-transparent" />
-
-                  <motion.span
-                    variants={iconHoverVariant}
-                    aria-hidden="true"
-                    className="absolute top-3 start-3 w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-[#D49A4A] flex items-center justify-center shadow-sm"
-                  >
-                    <CategoryIcon className="w-4 h-4" />
-                  </motion.span>
-
-                  {/* Frosted Glassmorphism Info Panel */}
-                  <div className="absolute bottom-2.5 inset-x-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 px-3 py-2 shadow-md transition-colors group-hover:bg-white/15">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-display text-xs sm:text-sm font-semibold text-white truncate leading-tight">
-                          {t.services.names[service.id] || service.name}
-                        </h3>
-                        <p
-                          dir="ltr"
-                          className="font-mono text-[10px] text-[#D49A4A] font-medium tabular-nums mt-0.5 truncate"
-                        >
-                          {service.responseSla} {t.services.sla}
-                        </p>
-                      </div>
-                      <motion.span
-                        variants={
-                          prefersReducedMotion
-                            ? undefined
-                            : {
-                                rest: { x: 0, y: 0 },
-                                hover: {
-                                  x: 2,
-                                  y: -2,
-                                  transition: {
-                                    type: 'spring' as const,
-                                    stiffness: 400,
-                                    damping: 20,
-                                  },
-                                },
-                              }
-                        }
-                        className="text-white/85 group-hover:text-white shrink-0 inline-flex"
+            {/* Dedicated Engineering Services & Solutions Executive Banner */}
+            {activeCategory === 'engineering' && (
+              <div className="mb-6 rounded-2xl p-6 sm:p-7 bg-[#132C40]/92 dark:bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl">
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                  <div className="max-w-3xl">
+                    <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-[#D49A4A] mb-1.5">
+                      {t.services.engineeringBanner.eyebrow}
+                    </p>
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-2">
+                      {t.services.engineeringBanner.title}
+                    </h2>
+                    <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
+                      {t.services.engineeringBanner.description}
+                    </p>
+                    <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                      <span
+                        dir="ltr"
+                        className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/20 font-mono text-xs font-semibold text-[#56B4EE]"
                       >
-                        <ArrowUpRight className="w-4 h-4" />
-                      </motion.span>
+                        {t.services.engineeringBanner.standardsChip}
+                      </span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#D49A4A]/20 border border-[#D49A4A]/45 text-xs font-semibold text-[#D49A4A]">
+                        {t.services.engineeringBanner.slaChip}
+                      </span>
                     </div>
                   </div>
-                </button>
 
-                {/* Top-right Compare Selection Toggle */}
-                <button
-                  type="button"
-                  onClick={() => handleToggleCompare(service.id)}
-                  aria-pressed={isCompared}
-                  aria-label={
-                    isCompared
-                      ? `Remove ${service.name} from comparison`
-                      : `Add ${service.name} to comparison`
+                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => onBookService('hvac')}
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#D49A4A] hover:bg-white text-[#0E2233] text-sm font-bold transition-colors cursor-pointer whitespace-nowrap shadow-md"
+                    >
+                      <span>{t.services.engineeringBanner.bookCta}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab Views: Video Reels | FAQs (Vertical Accordion) | Single-Column Vertical Service List */}
+            {activeCategory === 'video-reels' ? (
+              <ClientSuccessSpotlight
+                embedded
+                onBookRegion={(reg) => {
+                  if (onBookRegion) {
+                    onBookRegion(reg);
+                  } else {
+                    onBookService('hvac');
                   }
-                  className={`absolute top-3 end-3 z-10 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold backdrop-blur-md border transition-colors cursor-pointer whitespace-nowrap ${
-                    isCompared
-                      ? 'bg-[#D49A4A] border-[#D49A4A] text-[#0E2233] shadow-sm'
-                      : 'bg-white/10 hover:bg-[#1D72B8]/90 border-white/20 text-white'
-                  }`}
-                >
-                  {isCompared ? (
-                    <>
-                      <Check className="w-3 h-3 shrink-0" />
-                      <span>{t.services.comparing}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-3 h-3 shrink-0" />
-                      <span>{t.services.compare}</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            );
-          })}
-        </div>
+                }}
+              />
+            ) : activeCategory === 'faqs' ? (
+              <FaqSection
+                embedded
+                onBookConsultation={() => onBookService('hvac')}
+              />
+            ) : (
+              <>
+                {/* One Long Single-Column Vertical Service List */}
+                <div className="flex flex-col gap-3.5">
+                  {filteredServices.map((service, idx) => {
+                    const isSelected = selectedServiceId === service.id;
+                    const isCompared = compareIds.includes(service.id);
+                    const CategoryIcon =
+                      CATEGORY_ICON_MAP[
+                        service.category as Exclude<
+                          ServiceCategory,
+                          'all' | 'engineering' | 'video-reels' | 'faqs'
+                        >
+                      ] || Wrench;
+                    const localizedName =
+                      t.services.names[service.id] || service.name;
+                    const localizedCategory =
+                      t.services.categories[service.categoryLabel] ||
+                      service.categoryLabel;
 
-        {/* Interactive Side-by-Side Comparison Table */}
-        <ServiceComparisonTable
-          compareIds={compareIds}
-          onToggleCompare={handleToggleCompare}
-          onReplaceSlot={handleReplaceSlot}
-          onResetDefault={() => {
-            setLimitWarning(null);
-            setCompareIds(DEFAULT_COMPARE_IDS);
-          }}
-          onClearAll={() => {
-            setLimitWarning(null);
-            setCompareIds([]);
-          }}
-          onBookService={onBookService}
-              limitWarning={limitWarning}
-              onDismissWarning={() => setLimitWarning(null)}
-            />
-          </>
-        )}
+                    return (
+                      <motion.div
+                        key={service.id}
+                        layout={!prefersReducedMotion}
+                        initial="rest"
+                        whileHover="hover"
+                        className={`group relative rounded-2xl overflow-hidden bg-white/60 dark:bg-white/10 backdrop-blur-md border transition-all shadow-sm hover:shadow-xl ${
+                          isCompared
+                            ? 'border-[#D49A4A] ring-2 ring-[#D49A4A]/65'
+                            : isSelected
+                              ? 'border-[#1D72B8] ring-2 ring-[#1D72B8]/80'
+                              : 'border-white/70 dark:border-white/15 hover:border-[#1D72B8]/60'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row items-stretch">
+                          {/* Photo Thumbnail */}
+                          <button
+                            type="button"
+                            onClick={() => setDetailService(service)}
+                            aria-label={`Inspect ${localizedName} details`}
+                            className="relative sm:w-56 md:w-64 aspect-[16/10] sm:aspect-auto sm:min-h-[156px] shrink-0 overflow-hidden bg-[#0E2233] cursor-pointer focus:outline-none"
+                          >
+                            <ResilientImage
+                              src={service.image}
+                              alt={localizedName}
+                              fallbackTitle={localizedName}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0E2233]/80 via-[#0E2233]/20 to-transparent" />
+
+                            <motion.span
+                              variants={iconHoverVariant}
+                              aria-hidden="true"
+                              className="absolute top-3 start-3 w-8 h-8 rounded-lg bg-white/15 backdrop-blur-md border border-white/25 text-[#D49A4A] flex items-center justify-center shadow-sm"
+                            >
+                              <CategoryIcon className="w-4 h-4" />
+                            </motion.span>
+
+                            <span
+                              dir="ltr"
+                              className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/55 backdrop-blur-sm border border-white/15 font-mono text-xs font-semibold text-[#D49A4A] tabular-nums"
+                            >
+                              <Clock className="w-3.5 h-3.5" />
+                              <span>
+                                {service.responseSla} {t.services.sla}
+                              </span>
+                            </span>
+                          </button>
+
+                          {/* Details & Actions Column */}
+                          <div className="flex-1 min-w-0 p-4 sm:p-5 flex flex-col justify-between gap-3">
+                            <div>
+                              <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    dir="ltr"
+                                    className="font-mono text-xs font-bold text-slate-400 dark:text-slate-400 tabular-nums"
+                                  >
+                                    {String(idx + 1).padStart(2, '0')}
+                                  </span>
+                                  <span className="text-xs font-semibold text-[#1D72B8] dark:text-[#56B4EE]">
+                                    {localizedCategory}
+                                  </span>
+                                </div>
+
+                                <span
+                                  dir="ltr"
+                                  className="font-mono text-xs font-medium text-slate-600 dark:text-slate-300 bg-white/60 dark:bg-white/10 border border-slate-200/80 dark:border-white/10 px-2.5 py-0.5 rounded-md"
+                                >
+                                  {service.specs.certifications}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => setDetailService(service)}
+                                className="text-start cursor-pointer group/title"
+                              >
+                                <h3 className="font-display text-lg sm:text-xl font-bold text-[#132C40] dark:text-white group-hover/title:text-[#1D72B8] dark:group-hover/title:text-[#56B4EE] transition-colors leading-snug">
+                                  {localizedName}
+                                </h3>
+                              </button>
+
+                              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-200 mt-1 leading-relaxed">
+                                {service.tagline}
+                              </p>
+                            </div>
+
+                            <div className="pt-2.5 border-t border-slate-200/70 dark:border-white/10 flex flex-wrap items-center justify-between gap-2.5">
+                              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-300">
+                                {service.specs.dispatchTier} ·{' '}
+                                <span dir="ltr" className="font-mono font-medium">
+                                  {service.specs.warrantyPeriod}
+                                </span>
+                              </span>
+
+                              <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleCompare(service.id)}
+                                  aria-pressed={isCompared}
+                                  aria-label={
+                                    isCompared
+                                      ? `Remove ${localizedName} from comparison`
+                                      : `Add ${localizedName} to comparison`
+                                  }
+                                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
+                                    isCompared
+                                      ? 'bg-[#D49A4A] border-[#D49A4A] text-[#0E2233] shadow-sm'
+                                      : 'bg-white/60 dark:bg-white/10 hover:bg-[#1D72B8]/15 border-slate-200 dark:border-white/15 text-[#132C40] dark:text-white'
+                                  }`}
+                                >
+                                  {isCompared ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 shrink-0" />
+                                      <span>{t.services.comparing}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Plus className="w-3.5 h-3.5 shrink-0" />
+                                      <span>{t.services.compare}</span>
+                                    </>
+                                  )}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setDetailService(service)}
+                                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/60 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 border border-slate-200 dark:border-white/15 text-[#132C40] dark:text-white transition-colors cursor-pointer whitespace-nowrap"
+                                >
+                                  <span>{t.nav.viewDirectory}</span>
+                                  <ArrowUpRight className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => onBookService(service.id)}
+                                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-white bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1D72B8] dark:hover:bg-[#D49A4A] dark:hover:text-[#0E2233] transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                                >
+                                  <span>{t.services.bookPrefix}</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Interactive Side-by-Side Comparison Table */}
+                <ServiceComparisonTable
+                  compareIds={compareIds}
+                  onToggleCompare={handleToggleCompare}
+                  onReplaceSlot={handleReplaceSlot}
+                  onResetDefault={() => {
+                    setLimitWarning(null);
+                    setCompareIds(DEFAULT_COMPARE_IDS);
+                  }}
+                  onClearAll={() => {
+                    setLimitWarning(null);
+                    setCompareIds([]);
+                  }}
+                  onBookService={onBookService}
+                  limitWarning={limitWarning}
+                  onDismissWarning={() => setLimitWarning(null)}
+                />
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Service Details Modal */}
@@ -446,7 +556,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             </div>
 
             <div className="p-6">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 dark:text-slate-400 mb-1">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-500 dark:text-slate-400 mb-1">
                 <span>
                   {t.services.categories[detailService.categoryLabel] ||
                     detailService.categoryLabel}
@@ -466,11 +576,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               <h3 className="font-display text-2xl font-bold text-neutral-950 dark:text-white mb-2">
                 {t.services.names[detailService.id] || detailService.name}
               </h3>
-              <p className="text-sm text-neutral-600 dark:text-slate-300 leading-relaxed mb-4">
+              <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-300 leading-relaxed mb-4">
                 {detailService.tagline}
               </p>
 
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-slate-200/80 dark:border-white/15 text-xs mb-6">
+              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-slate-200/80 dark:border-white/15 text-sm mb-6">
                 <div>
                   <span className="text-slate-500 dark:text-slate-400 block">
                     {t.services.standards}
@@ -534,4 +644,3 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     </div>
   );
 };
-

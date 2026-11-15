@@ -16,6 +16,11 @@ import { StrategicPillarsSection } from './components/StrategicPillarsSection';
 import { SupportPortalWidget } from './components/SupportPortalWidget';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import { RegionId, ServiceCategory } from './types/kelvis';
+import {
+  initSmoothScroll,
+  resizeSmoothScroll,
+  scrollToTopSmooth,
+} from './utils/smoothScroll';
 
 const DELIVERY_MILESTONES = [
   {
@@ -96,13 +101,21 @@ function AppContent() {
       window.removeEventListener('gmp-quota-exceeded', handleQuotaExceeded);
   }, []);
 
+  useEffect(() => {
+    return initSmoothScroll(Boolean(prefersReducedMotion));
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    resizeSmoothScroll();
+  }, [activeTab]);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   const switchTab = (tab: MainTabId) => {
     setActiveTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTopSmooth();
   };
 
   const handleBookService = (serviceId: string) => {
@@ -164,7 +177,7 @@ function AppContent() {
                   className="flex items-center gap-3 mb-4"
                 >
                   <span className="w-8 h-px bg-[#D49A4A]" aria-hidden="true" />
-                  <p className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-[#2E96D8]">
+                  <p className="text-sm sm:text-base font-semibold tracking-wider uppercase text-[#2E96D8]">
                     {t.hero.eyebrow}
                   </p>
                 </motion.div>
@@ -199,7 +212,7 @@ function AppContent() {
                   <button
                     type="button"
                     onClick={() => switchTab('book')}
-                    className="inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-[#0E2233] bg-[#D49A4A] hover:bg-white rounded-lg transition-colors min-h-[48px] whitespace-nowrap cursor-pointer shadow-lg"
+                    className="inline-flex items-center gap-2.5 px-7 py-3.5 text-sm sm:text-base font-semibold text-[#0E2233] bg-[#D49A4A] hover:bg-white rounded-lg transition-colors min-h-[48px] whitespace-nowrap cursor-pointer shadow-lg"
                   >
                     <span>{t.hero.bookService}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -208,7 +221,7 @@ function AppContent() {
                   <button
                     type="button"
                     onClick={() => setQuickQuoteOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-white/12 hover:bg-white/22 border border-white/30 backdrop-blur-md rounded-lg transition-colors min-h-[48px] whitespace-nowrap cursor-pointer shadow-lg"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 text-sm sm:text-base font-semibold text-white bg-white/12 hover:bg-white/22 border border-white/30 backdrop-blur-md rounded-lg transition-colors min-h-[48px] whitespace-nowrap cursor-pointer shadow-lg"
                   >
                     <Calculator className="w-4 h-4 text-[#D49A4A]" />
                     <span>{t.hero.quickQuote}</span>
@@ -250,7 +263,7 @@ function AppContent() {
                       className="w-10 h-px bg-gradient-to-r from-transparent to-[#D49A4A]"
                       aria-hidden="true"
                     />
-                    <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[#56B4EE]">
+                    <p className="text-sm font-semibold tracking-[0.2em] uppercase text-[#56B4EE]">
                       {t.milestones.eyebrow}
                     </p>
                     <span
@@ -265,7 +278,7 @@ function AppContent() {
                     </span>{' '}
                     {t.milestones.titleSuffix}
                   </h2>
-                  <p className="mt-3 text-xs sm:text-sm font-medium tracking-wide text-slate-300">
+                  <p className="mt-3 text-sm sm:text-base font-medium tracking-wide text-slate-300">
                     {t.regions.london} · {t.regions.germany} · {t.regions.dubai}
                   </p>
                 </div>
@@ -373,10 +386,10 @@ function AppContent() {
                                   {methodology.source}
                                 </span>
                               </div>
-                              <p className="font-display text-xs font-bold text-white mb-1">
+                              <p className="font-display text-sm font-bold text-white mb-1">
                                 {methodology.title}
                               </p>
-                              <p className="text-[11px] leading-relaxed text-slate-200">
+                              <p className="text-xs sm:text-sm leading-relaxed text-slate-200">
                                 {methodology.detail}
                               </p>
                               <span
@@ -399,7 +412,7 @@ function AppContent() {
                               liveDriftStep={item.liveDriftStep}
                             />
                           </p>
-                          <p className="text-xs sm:text-sm font-medium text-slate-200 mt-3 leading-snug max-w-[18ch]">
+                          <p className="text-sm sm:text-base font-medium text-slate-200 mt-3 leading-snug max-w-[20ch]">
                             {t.milestones[item.key]}
                           </p>
                         </div>

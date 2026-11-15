@@ -36,7 +36,7 @@ const FACILITY_SCALES: {
 ];
 
 const BASE_ESTIMATE_GBP: Record<
-  Exclude<ServiceCategory, 'all' | 'engineering' | 'video-reels'>,
+  Exclude<ServiceCategory, 'all' | 'engineering' | 'video-reels' | 'faqs'>,
   [number, number]
 > = {
   mep: [380, 690],

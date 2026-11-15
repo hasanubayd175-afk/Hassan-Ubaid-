@@ -4,6 +4,7 @@ export type ServiceCategory =
   | 'all'
   | 'engineering'
   | 'video-reels'
+  | 'faqs'
   | 'mep'
   | 'build'
   | 'security-it'
@@ -22,7 +23,10 @@ export interface ServiceTechSpecs {
 export interface ServiceItem {
   id: string;
   name: string;
-  category: Exclude<ServiceCategory, 'all' | 'engineering' | 'video-reels'>;
+  category: Exclude<
+    ServiceCategory,
+    'all' | 'engineering' | 'video-reels' | 'faqs'
+  >;
   categoryLabel: string;
   tagline: string;
   responseSla: string;
