@@ -58,6 +58,7 @@ export interface VideoChapter {
   regionLabel: string;
   durationSec: number;
   durationFormatted: string;
+  videoUrl?: string;
   frames: {
     image: string;
     caption: string;
@@ -137,6 +138,7 @@ export interface ClientSpotlightClip {
   outcomeMetric: string;
   durationSec: number;
   durationFormatted: string;
+  videoUrl?: string;
   quote: string;
   frames: {
     image: string;

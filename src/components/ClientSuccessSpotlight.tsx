@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   Captions,
   ChevronLeft,
   ChevronRight,
+  Download,
   MapPin,
   Maximize2,
   Pause,
@@ -37,8 +38,12 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
   );
   const [isPlaying, setIsPlaying] = useState(true);
   const [elapsedSec, setElapsedSec] = useState(0);
+  const [videoDurationSec, setVideoDurationSec] = useState<number | null>(null);
+  const [videoFailed, setVideoFailed] = useState<Record<string, boolean>>({});
   const [captionsOn, setCaptionsOn] = useState(true);
   const [theaterOpen, setTheaterOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const theaterVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const visibleClips = useMemo(() => {
     if (regionFilter === 'all') return CLIENT_SPOTLIGHT_CLIPS;
@@ -51,18 +56,37 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
   }, [visibleClips, activeClipId]);
 
   const activeClip = visibleClips[activeIndex] || CLIENT_SPOTLIGHT_CLIPS[0];
+  const hasRealVideo =
+    Boolean(activeClip.videoUrl) && !videoFailed[activeClip.id];
+  const effectiveDurationSec =
+    hasRealVideo && videoDurationSec && videoDurationSec > 0
+      ? videoDurationSec
+      : activeClip.durationSec;
 
   const frameIndex =
-    elapsedSec >= activeClip.durationSec / 2 && activeClip.frames.length > 1
+    elapsedSec >= effectiveDurationSec / 2 && activeClip.frames.length > 1
       ? 1
       : 0;
   const activeFrame = activeClip.frames[frameIndex] || activeClip.frames[0];
 
   useEffect(() => {
+    setVideoDurationSec(null);
+    setElapsedSec(0);
+  }, [activeClip.id]);
+
+  useEffect(() => {
+    if (hasRealVideo && videoRef.current) {
+      if (isPlaying && !theaterOpen && !prefersReducedMotion) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+      return;
+    }
     if (!isPlaying) return;
     const timer = window.setInterval(() => {
       setElapsedSec((prev) => {
-        if (prev + 1 >= activeClip.durationSec) {
+        if (prev + 1 >= effectiveDurationSec) {
           const nextIdx = (activeIndex + 1) % visibleClips.length;
           if (visibleClips[nextIdx]) {
             setActiveClipId(visibleClips[nextIdx].id);
@@ -73,7 +97,25 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [isPlaying, activeClip.durationSec, activeIndex, visibleClips]);
+  }, [
+    isPlaying,
+    hasRealVideo,
+    effectiveDurationSec,
+    activeIndex,
+    visibleClips,
+    theaterOpen,
+    prefersReducedMotion,
+    activeClip.id,
+  ]);
+
+  useEffect(() => {
+    if (!theaterOpen || !hasRealVideo || !theaterVideoRef.current) return;
+    if (isPlaying && !prefersReducedMotion) {
+      theaterVideoRef.current.play().catch(() => {});
+    } else {
+      theaterVideoRef.current.pause();
+    }
+  }, [theaterOpen, isPlaying, hasRealVideo, prefersReducedMotion, activeClip.id]);
 
   const selectClip = (clipId: string) => {
     setActiveClipId(clipId);
@@ -112,7 +154,7 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
 
   const progressPct = Math.min(
     100,
-    (elapsedSec / activeClip.durationSec) * 100
+    effectiveDurationSec > 0 ? (elapsedSec / effectiveDurationSec) * 100 : 0
   );
 
   return (
@@ -226,8 +268,43 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                   />
                 </motion.div>
               </AnimatePresence>
+              {hasRealVideo && activeClip.videoUrl && (
+                <video
+                  ref={videoRef}
+                  key={activeClip.id}
+                  src={activeClip.videoUrl}
+                  poster={activeClip.frames[0].image}
+                  muted
+                  playsInline
+                  autoPlay={isPlaying && !prefersReducedMotion}
+                  preload="metadata"
+                  onLoadedMetadata={(e) => {
+                    const dur = e.currentTarget.duration;
+                    if (Number.isFinite(dur) && dur > 0) {
+                      setVideoDurationSec(dur);
+                    }
+                  }}
+                  onTimeUpdate={(e) => {
+                    setElapsedSec(e.currentTarget.currentTime);
+                  }}
+                  onEnded={() => {
+                    const nextIdx = (activeIndex + 1) % visibleClips.length;
+                    if (visibleClips[nextIdx]) {
+                      setActiveClipId(visibleClips[nextIdx].id);
+                    }
+                    setElapsedSec(0);
+                  }}
+                  onError={() =>
+                    setVideoFailed((prev) => ({
+                      ...prev,
+                      [activeClip.id]: true,
+                    }))
+                  }
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#07111C] via-[#07111C]/25 to-[#07111C]/50" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#07111C] via-[#07111C]/25 to-[#07111C]/50 pointer-events-none" />
 
               {/* Top Overlay: Partner Pill + Metric + Action Controls */}
               <div className="absolute top-3.5 inset-x-3.5 sm:top-4 sm:inset-x-4 flex items-center justify-between gap-2">
@@ -260,6 +337,17 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {activeClip.videoUrl && (
+                    <a
+                      href={activeClip.videoUrl}
+                      download={`kelvix-${activeClip.id}.mp4`}
+                      aria-label={`Download ${activeClip.clipTitle} MP4`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold bg-black/50 hover:bg-black/80 border border-white/20 text-white backdrop-blur-md transition-colors cursor-pointer whitespace-nowrap"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">MP4</span>
+                    </a>
+                  )}
                   <button
                     type="button"
                     onClick={() => setCaptionsOn((prev) => !prev)}
@@ -310,16 +398,18 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                   role="slider"
                   aria-label="Partner video clip timeline"
                   aria-valuemin={0}
-                  aria-valuemax={activeClip.durationSec}
-                  aria-valuenow={elapsedSec}
+                  aria-valuemax={Math.round(effectiveDurationSec)}
+                  aria-valuenow={Math.round(elapsedSec)}
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'ArrowRight') {
-                      setElapsedSec((s) =>
-                        Math.min(activeClip.durationSec - 1, s + 3)
-                      );
+                      const next = Math.min(effectiveDurationSec - 0.5, elapsedSec + 2);
+                      setElapsedSec(next);
+                      if (videoRef.current) videoRef.current.currentTime = next;
                     } else if (e.key === 'ArrowLeft') {
-                      setElapsedSec((s) => Math.max(0, s - 3));
+                      const next = Math.max(0, elapsedSec - 2);
+                      setElapsedSec(next);
+                      if (videoRef.current) videoRef.current.currentTime = next;
                     }
                   }}
                   onClick={(e) => {
@@ -328,12 +418,16 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                       0,
                       Math.min(1, (e.clientX - rect.left) / rect.width)
                     );
-                    setElapsedSec(Math.floor(ratio * activeClip.durationSec));
+                    const nextSec = ratio * effectiveDurationSec;
+                    setElapsedSec(nextSec);
+                    if (videoRef.current) {
+                      videoRef.current.currentTime = nextSec;
+                    }
                   }}
                   className="w-full h-1.5 bg-white/25 rounded-full overflow-hidden cursor-pointer mb-3"
                 >
                   <div
-                    className="h-full bg-gradient-to-r from-[#2E96D8] to-[#D49A4A] transition-[width] duration-300"
+                    className="h-full bg-gradient-to-r from-[#2E96D8] to-[#D49A4A] transition-[width] duration-200"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -403,7 +497,7 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                       dir="ltr"
                       className="font-mono text-xs text-slate-200 tabular-nums shrink-0"
                     >
-                      {formatTime(elapsedSec)} / {activeClip.durationFormatted}
+                      {formatTime(elapsedSec)} / {formatTime(effectiveDurationSec)}
                     </span>
                   </div>
                 </div>
@@ -595,7 +689,19 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
                     : 'animate-ken-burns-paused'
                 }`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              {hasRealVideo && activeClip.videoUrl && (
+                <video
+                  ref={theaterVideoRef}
+                  src={activeClip.videoUrl}
+                  poster={activeClip.frames[0].image}
+                  controls
+                  autoPlay={isPlaying && !prefersReducedMotion}
+                  playsInline
+                  loop
+                  className="absolute inset-0 w-full h-full object-cover bg-black"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
               <div className="absolute bottom-4 inset-x-5 flex items-center justify-between gap-4">
                 <p className="text-sm sm:text-base text-white max-w-2xl bg-black/60 backdrop-blur-sm px-4 py-2.5 rounded-lg border border-white/15">
                   &ldquo;{activeClip.quote}&rdquo; — {activeClip.speakerName}

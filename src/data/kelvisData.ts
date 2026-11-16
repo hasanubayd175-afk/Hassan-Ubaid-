@@ -8,25 +8,62 @@ import {
   VideoChapter,
 } from '../types/kelvis';
 
+import heroFacilityImg from '../assets/images/hero_facility_operations_1794664790268.jpg';
+import mepHvacImg from '../assets/images/service_mep_hvac_1794664792477.jpg';
+import constructionPaintingImg from '../assets/images/service_construction_painting_1794664791626.jpg';
+import securityItImg from '../assets/images/service_security_it_1794664790562.jpg';
+import groundsCleaningImg from '../assets/images/service_grounds_cleaning_1794664792926.jpg';
+import teamHubsImg from '../assets/images/team_global_hubs_1794664792848.jpg';
+import plumbingRealImg from '../assets/images/photo_plumbing_real_1794665717312.jpg';
+import electricalRealImg from '../assets/images/photo_electrical_real_1794665718367.jpg';
+import paintingRealImg from '../assets/images/photo_painting_real_1794665717713.jpg';
+import cleaningRealImg from '../assets/images/photo_cleaning_real_1794665718881.jpg';
+import gardeningRealImg from '../assets/images/photo_gardening_real_1794665718887.jpg';
+import pestControlRealImg from '../assets/images/photo_pest_control_real_1794665718998.jpg';
+import londonHubImg from '../assets/images/london_bridge_hub_1794667818125.jpg';
+import germanyHubImg from '../assets/images/germany_frankfurt_hub_1794667817193.jpg';
+import dubaiHubImg from '../assets/images/dubai_downtown_hub_1794667818470.jpg';
+
+import teamHassanImg from '../assets/images/team_hassan_ubaid_1794670909417.jpg';
+import teamEzazImg from '../assets/images/team_ezaz_hussain_1794670909404.jpg';
+import teamAliHussnainImg from '../assets/images/team_ali_hussnain_1794670911244.jpg';
+import teamAliSattiImg from '../assets/images/team_ali_satti_1794670911184.jpg';
+import teamShabanImg from '../assets/images/team_shaban_maqbool_1794670911217.jpg';
+
+import heroLondonVideo from '../assets/videos/hero_london_reel.mp4';
+import heroGermanyVideo from '../assets/videos/hero_germany_reel.mp4';
+import heroDubaiVideo from '../assets/videos/hero_dubai_reel.mp4';
+import showreelMepVideo from '../assets/videos/showreel_mep_operations.mp4';
+import showreelBuildVideo from '../assets/videos/showreel_build_fitout.mp4';
+import showreelSecurityItVideo from '../assets/videos/showreel_security_it.mp4';
+import showreelGroundsVideo from '../assets/videos/showreel_grounds_care.mp4';
+import spotlightLondonLidlVideo from '../assets/videos/spotlight_london_lidl.mp4';
+import spotlightGermanyLidlVideo from '../assets/videos/spotlight_germany_lidl.mp4';
+import spotlightLondonTescoVideo from '../assets/videos/spotlight_london_tesco.mp4';
+import spotlightGermanyRheinwerkVideo from '../assets/videos/spotlight_germany_rheinwerk.mp4';
+
 export const IMAGES = {
-  hero: '/src/assets/images/hero_facility_operations_1794664790268.jpg',
-  mepHvac: '/src/assets/images/service_mep_hvac_1794664792477.jpg',
-  constructionPainting:
-    '/src/assets/images/service_construction_painting_1794664791626.jpg',
-  securityIt: '/src/assets/images/service_security_it_1794664790562.jpg',
-  groundsCleaning:
-    '/src/assets/images/service_grounds_cleaning_1794664792926.jpg',
-  teamHubs: '/src/assets/images/team_global_hubs_1794664792848.jpg',
-  plumbingReal: '/src/assets/images/photo_plumbing_real_1794665717312.jpg',
-  electricalReal: '/src/assets/images/photo_electrical_real_1794665718367.jpg',
-  paintingReal: '/src/assets/images/photo_painting_real_1794665717713.jpg',
-  cleaningReal: '/src/assets/images/photo_cleaning_real_1794665718881.jpg',
-  gardeningReal: '/src/assets/images/photo_gardening_real_1794665718887.jpg',
-  pestControlReal:
-    '/src/assets/images/photo_pest_control_real_1794665718998.jpg',
-  londonHub: '/src/assets/images/london_bridge_hub_1794667818125.jpg',
-  germanyHub: '/src/assets/images/germany_frankfurt_hub_1794667817193.jpg',
-  dubaiHub: '/src/assets/images/dubai_downtown_hub_1794667818470.jpg',
+  hero: heroFacilityImg,
+  mepHvac: mepHvacImg,
+  constructionPainting: constructionPaintingImg,
+  securityIt: securityItImg,
+  groundsCleaning: groundsCleaningImg,
+  teamHubs: teamHubsImg,
+  plumbingReal: plumbingRealImg,
+  electricalReal: electricalRealImg,
+  paintingReal: paintingRealImg,
+  cleaningReal: cleaningRealImg,
+  gardeningReal: gardeningRealImg,
+  pestControlReal: pestControlRealImg,
+  londonHub: londonHubImg,
+  germanyHub: germanyHubImg,
+  dubaiHub: dubaiHubImg,
+};
+
+export const HERO_VIDEOS = {
+  london: heroLondonVideo,
+  germany: heroGermanyVideo,
+  dubai: heroDubaiVideo,
 };
 
 export const SERVICES: ServiceItem[] = [
@@ -326,8 +363,9 @@ export const VIDEO_CHAPTERS: VideoChapter[] = [
     id: 'mep-reel',
     title: 'Plumbing, Electrical & HVAC',
     regionLabel: 'London & Munich',
-    durationSec: 24,
-    durationFormatted: '00:24',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: showreelMepVideo,
     frames: [
       {
         image: IMAGES.plumbingReal,
@@ -343,8 +381,9 @@ export const VIDEO_CHAPTERS: VideoChapter[] = [
     id: 'build-reel',
     title: 'Construction & Painting',
     regionLabel: 'Dubai & London',
-    durationSec: 24,
-    durationFormatted: '00:24',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: showreelBuildVideo,
     frames: [
       {
         image: IMAGES.paintingReal,
@@ -360,8 +399,9 @@ export const VIDEO_CHAPTERS: VideoChapter[] = [
     id: 'security-it-reel',
     title: 'Security & IT Infrastructure',
     regionLabel: 'Frankfurt & Dubai',
-    durationSec: 24,
-    durationFormatted: '00:24',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: showreelSecurityItVideo,
     frames: [
       {
         image: IMAGES.securityIt,
@@ -377,8 +417,9 @@ export const VIDEO_CHAPTERS: VideoChapter[] = [
     id: 'grounds-reel',
     title: 'Cleaning, Gardening & Pest QA',
     regionLabel: 'London & Dubai',
-    durationSec: 24,
-    durationFormatted: '00:24',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: showreelGroundsVideo,
     frames: [
       {
         image: IMAGES.cleaningReal,
@@ -470,7 +511,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     credential: 'CEng · MCIBSE',
     specialty: 'Multi-Site MEP Strategy',
     initials: 'HU',
-    photo: '/src/assets/images/team_hassan_ubaid_1794670909417.jpg',
+    photo: teamHassanImg,
     bio: 'Directs tri-region technical operations across London, Germany, and Dubai—overseeing 1.8M+ sqm of chiller, BMS, and enterprise SLA contracts.',
     skills: ['ISO 50001 Lead', 'BMS Architecture', 'Portfolio SLA Governance'],
   },
@@ -482,7 +523,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     credential: 'Dipl.-Ing. · VDE 0105',
     specialty: 'HVAC Chillers & Mechanical Plants',
     initials: 'EH',
-    photo: '/src/assets/images/team_ezaz_hussain_1794670909404.jpg',
+    photo: teamEzazImg,
     bio: 'Leads DACH thermal load-balancing, industrial rotating machinery overhauls, and preventive plant room QA across Munich and Frankfurt.',
     skills: ['DIN EN Chiller QA', 'TÜV Thermal Audit', 'Industrial VRF'],
   },
@@ -494,7 +535,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     credential: 'NICEIC Principal · EICR',
     specialty: 'HV/LV Switchgear & Power Continuity',
     initials: 'AH',
-    photo: '/src/assets/images/team_ali_hussnain_1794670911244.jpg',
+    photo: teamAliHussnainImg,
     bio: 'Specializes in mission-critical UPS failover, infrared switchgear thermography, and 24/7 fault isolation for financial and healthcare towers.',
     skills: ['HV Switchgear', 'Infrared EICR', 'DGUV V3 Audits'],
   },
@@ -506,7 +547,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     credential: 'DEWA Approved · PMP',
     specialty: 'Turnkey Build & Structural Retrofit',
     initials: 'AS',
-    photo: '/src/assets/images/team_ali_satti_1794670911184.jpg',
+    photo: teamAliSattiImg,
     bio: 'Delivers fast-track CAT-A/CAT-B corporate fit-outs, architectural finishes, and Dubai Municipality compliant structural retrofits.',
     skills: ['CAT-A/B Turnkey', 'DM Code Compliance', 'ISO 45001 Safety'],
   },
@@ -518,7 +559,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     credential: 'CISSP · BICSI RCDD',
     specialty: 'Biometric Access, CCTV & Fiber Cores',
     initials: 'SM',
-    photo: '/src/assets/images/team_shaban_maqbool_1794670911217.jpg',
+    photo: teamShabanImg,
     bio: 'Architects SIRA-compliant perimeter security, structured OM4 fiber backbones, and Wi-Fi 7 enterprise cores across multi-tenant hubs.',
     skills: ['ISO 27001 SecOps', 'OM4 Fiber & Wi-Fi 7', 'SIRA Biometrics'],
   },
@@ -607,8 +648,9 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
     clipTitle: 'Weekend Chiller & BMS Plant Overhaul',
     serviceTag: 'HVAC · Electrical Maintenance',
     outcomeMetric: '-34% Peak HVAC Load',
-    durationSec: 36,
-    durationFormatted: '00:36',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: spotlightLondonLidlVideo,
     quote:
       'Kelvix replaced two commercial chillers and re-balanced our Bishopsgate LV load over a single weekend—cutting Q1 cooling draw by 34% without interrupting trading.',
     frames: [
@@ -620,7 +662,7 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
       {
         image: IMAGES.mepHvac,
         caption: 'BMS chiller staging calibrated to achieve 34% energy reduction.',
-        timestamp: '00:18',
+        timestamp: '00:04',
       },
     ],
   },
@@ -637,8 +679,9 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
     clipTitle: 'VDE 0105 Switchgear & Cold-Storage QA',
     serviceTag: 'Electrical · Mechanical',
     outcomeMetric: '99.8% Cold-Chain Uptime',
-    durationSec: 40,
-    durationFormatted: '00:40',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: spotlightGermanyLidlVideo,
     quote:
       'During our Munich and Frankfurt seasonal audits, Kelvix engineers isolated a phase imbalance on infrared thermography hours before peak logistics shift dispatch.',
     frames: [
@@ -650,7 +693,7 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
       {
         image: IMAGES.electricalReal,
         caption: 'Thermographic HV/LV load balancing compliant with VDE 0105 & DIN standards.',
-        timestamp: '00:20',
+        timestamp: '00:04',
       },
     ],
   },
@@ -667,8 +710,9 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
     clipTitle: '38-Min Rapid Plumbing & Access Integration',
     serviceTag: 'Plumbing · Security & IT',
     outcomeMetric: '38 min Avg SLA Arrival',
-    durationSec: 32,
-    durationFormatted: '00:32',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: spotlightLondonTescoVideo,
     quote:
       'When an overnight booster riser failed at our Canary Wharf flagship, the Kelvix mobile unit arrived in 35 minutes and restored full pressure before dawn.',
     frames: [
@@ -680,7 +724,7 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
       {
         image: IMAGES.securityIt,
         caption: 'Synchronized OM4 retail network racks & NSI-compliant perimeter gates.',
-        timestamp: '00:16',
+        timestamp: '00:04',
       },
     ],
   },
@@ -697,8 +741,9 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
     clipTitle: 'TÜV-Certified Rotating Plant & HVAC Continuity',
     serviceTag: 'Mechanical · HVAC',
     outcomeMetric: 'Zero Unplanned Outages',
-    durationSec: 38,
-    durationFormatted: '00:38',
+    durationSec: 9,
+    durationFormatted: '00:09',
+    videoUrl: spotlightGermanyRheinwerkVideo,
     quote:
       'Unifying mechanical plant room care, TÜV vibration diagnostics, and DIN-compliant HVAC maintenance under one SLA eliminated multi-vendor delays across our sites.',
     frames: [
@@ -710,7 +755,7 @@ export const CLIENT_SPOTLIGHT_CLIPS: ClientSpotlightClip[] = [
       {
         image: IMAGES.germanyHub,
         caption: '24/7 German dispatch desk oversight across Munich, Frankfurt & Berlin.',
-        timestamp: '00:19',
+        timestamp: '00:04',
       },
     ],
   },

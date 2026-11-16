@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowRight, Calculator, Info } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+import { ArrowRight, Calculator, Info, TrendingUp } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { AnimatedCounter } from './components/AnimatedCounter';
 import { BookingSection } from './components/BookingSection';
@@ -21,6 +22,12 @@ import {
   resizeSmoothScroll,
   scrollToTopSmooth,
 } from './utils/smoothScroll';
+
+type DocumentWithViewTransition = Document & {
+  startViewTransition?: (updateCallback: () => void) => {
+    finished: Promise<void>;
+  };
+};
 
 const DELIVERY_MILESTONES = [
   {
@@ -78,6 +85,8 @@ function AppContent() {
     return 'light';
   });
   const prefersReducedMotion = useReducedMotion();
+  const themeTransitionIdRef = useRef(0);
+  const themeFallbackTimerRef = useRef<number | null>(null);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -95,6 +104,18 @@ function AppContent() {
   }, [theme]);
 
   useEffect(() => {
+    return () => {
+      if (themeFallbackTimerRef.current !== null) {
+        window.clearTimeout(themeFallbackTimerRef.current);
+      }
+      document.documentElement.classList.remove(
+        'theme-crossfade',
+        'theme-transitioning'
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     const handleQuotaExceeded = () => setMapsQuotaExceeded(true);
     window.addEventListener('gmp-quota-exceeded', handleQuotaExceeded);
     return () =>
@@ -110,7 +131,57 @@ function AppContent() {
   }, [activeTab]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    const nextTheme: 'light' | 'dark' = theme === 'dark' ? 'light' : 'dark';
+    const root = document.documentElement;
+    const applyThemeDom = () => {
+      root.classList.toggle('dark', nextTheme === 'dark');
+    };
+
+    if (prefersReducedMotion || typeof document === 'undefined') {
+      applyThemeDom();
+      setTheme(nextTheme);
+      return;
+    }
+
+    const doc = document as DocumentWithViewTransition;
+    if (typeof doc.startViewTransition === 'function') {
+      const transitionId = ++themeTransitionIdRef.current;
+      root.classList.remove('theme-transitioning');
+      root.classList.add('theme-crossfade');
+
+      try {
+        const transition = doc.startViewTransition(() => {
+          applyThemeDom();
+          flushSync(() => {
+            setTheme(nextTheme);
+          });
+        });
+
+        transition.finished
+          .catch(() => {})
+          .finally(() => {
+            if (themeTransitionIdRef.current === transitionId) {
+              root.classList.remove('theme-crossfade');
+            }
+          });
+      } catch {
+        root.classList.remove('theme-crossfade');
+        applyThemeDom();
+        setTheme(nextTheme);
+      }
+      return;
+    }
+
+    if (themeFallbackTimerRef.current !== null) {
+      window.clearTimeout(themeFallbackTimerRef.current);
+    }
+    root.classList.add('theme-transitioning');
+    applyThemeDom();
+    setTheme(nextTheme);
+    themeFallbackTimerRef.current = window.setTimeout(() => {
+      root.classList.remove('theme-transitioning');
+      themeFallbackTimerRef.current = null;
+    }, 420);
   };
 
   const switchTab = (tab: MainTabId) => {
@@ -403,13 +474,18 @@ function AppContent() {
                         <div className="pt-1 flex flex-col items-center">
                           <p
                             dir="ltr"
-                            className="font-display text-3xl sm:text-[2.5rem] font-bold text-white tracking-tight leading-none tabular-nums"
+                            className="inline-flex items-center justify-center gap-1.5 font-display text-3xl sm:text-[2.5rem] font-bold text-white tracking-tight leading-none tabular-nums whitespace-nowrap"
                           >
                             <AnimatedCounter
                               target={item.target}
                               decimals={item.decimals}
                               suffix={item.suffix}
                               liveDriftStep={item.liveDriftStep}
+                            />
+                            <TrendingUp
+                              className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0"
+                              strokeWidth={2.5}
+                              aria-hidden="true"
                             />
                           </p>
                           <p className="text-sm sm:text-base font-medium text-slate-200 mt-3 leading-snug max-w-[20ch]">

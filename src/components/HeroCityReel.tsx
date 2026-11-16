@@ -6,7 +6,7 @@ import {
   useScroll,
   useTransform,
 } from 'motion/react';
-import { IMAGES } from '../data/kelvisData';
+import { HERO_VIDEOS, IMAGES } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { RegionId } from '../types/kelvis';
 import { ResilientImage } from './ResilientImage';
@@ -17,6 +17,7 @@ interface ReelClip {
   label: string;
   subtitle: string;
   image: string;
+  videoUrl: string;
 }
 
 const HERO_CLIPS: ReelClip[] = [
@@ -26,6 +27,7 @@ const HERO_CLIPS: ReelClip[] = [
     label: 'London',
     subtitle: 'City of London & Bishopsgate Hub',
     image: IMAGES.londonHub,
+    videoUrl: HERO_VIDEOS.london,
   },
   {
     id: 'germany',
@@ -33,6 +35,7 @@ const HERO_CLIPS: ReelClip[] = [
     label: 'Germany',
     subtitle: 'Frankfurt Financial District & Munich',
     image: IMAGES.germanyHub,
+    videoUrl: HERO_VIDEOS.germany,
   },
   {
     id: 'dubai',
@@ -40,6 +43,7 @@ const HERO_CLIPS: ReelClip[] = [
     label: 'Dubai',
     subtitle: 'Downtown Dubai & Boulevard Plaza',
     image: IMAGES.dubaiHub,
+    videoUrl: HERO_VIDEOS.dubai,
   },
 ];
 
@@ -56,6 +60,8 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
 }) => {
   const [clipIndex, setClipIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [videoFailed, setVideoFailed] = useState<Record<string, boolean>>({});
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const heroRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -73,6 +79,18 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
     }, CLIP_DURATION_MS);
     return () => window.clearInterval(timer);
   }, [isPlaying]);
+
+  useEffect(() => {
+    HERO_CLIPS.forEach((_, idx) => {
+      const vid = videoRefs.current[idx];
+      if (!vid) return;
+      if (idx === clipIndex && isPlaying && !prefersReducedMotion) {
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
+      }
+    });
+  }, [clipIndex, isPlaying, prefersReducedMotion]);
 
   const activeClip = HERO_CLIPS[clipIndex];
 
@@ -112,6 +130,7 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
       >
         {HERO_CLIPS.map((clip, idx) => {
           const isCurrent = idx === clipIndex;
+          const showVideo = !prefersReducedMotion && !videoFailed[clip.id];
           return (
             <div
               key={clip.id}
@@ -127,6 +146,23 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
                   isPlaying ? '' : 'animate-ken-burns-paused'
                 }`}
               />
+              {showVideo && (
+                <video
+                  ref={(el) => {
+                    videoRefs.current[idx] = el;
+                  }}
+                  src={clip.videoUrl}
+                  poster={clip.image}
+                  muted
+                  loop
+                  playsInline
+                  preload={idx === 0 ? 'auto' : 'metadata'}
+                  onError={() =>
+                    setVideoFailed((prev) => ({ ...prev, [clip.id]: true }))
+                  }
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
             </div>
           );
         })}

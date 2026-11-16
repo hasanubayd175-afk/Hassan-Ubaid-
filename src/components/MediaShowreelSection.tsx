@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Maximize2,
   Pause,
   Play,
   X,
 } from 'lucide-react';
+import { useReducedMotion } from 'motion/react';
 import { IMAGES, VIDEO_CHAPTERS } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ResilientImage } from './ResilientImage';
@@ -31,29 +33,56 @@ const GALLERY_ITEMS = [
 
 export const MediaShowreelSection: React.FC = () => {
   const { t } = useLanguage();
+  const prefersReducedMotion = useReducedMotion();
   const [viewMode, setViewMode] = useState<'photos' | 'video'>('photos');
   const [chapterIndex, setChapterIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [elapsedSec, setElapsedSec] = useState(0);
+  const [videoDurationSec, setVideoDurationSec] = useState<number | null>(null);
+  const [videoFailed, setVideoFailed] = useState<Record<string, boolean>>({});
   const [theaterOpen, setTheaterOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<{
+    id: string;
     title: string;
     meta: string;
     image: string;
   } | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const theaterVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const activeChapter = VIDEO_CHAPTERS[chapterIndex];
+  const hasRealVideo =
+    Boolean(activeChapter.videoUrl) && !videoFailed[activeChapter.id];
+  const effectiveDurationSec =
+    hasRealVideo && videoDurationSec && videoDurationSec > 0
+      ? videoDurationSec
+      : activeChapter.durationSec;
+
   const frameIndex =
-    elapsedSec >= activeChapter.durationSec / 2 && activeChapter.frames.length > 1
+    elapsedSec >= effectiveDurationSec / 2 && activeChapter.frames.length > 1
       ? 1
       : 0;
   const activeFrame = activeChapter.frames[frameIndex];
 
   useEffect(() => {
-    if (!isPlaying || viewMode !== 'video') return;
+    setVideoDurationSec(null);
+    setElapsedSec(0);
+  }, [activeChapter.id]);
+
+  useEffect(() => {
+    if (viewMode !== 'video') return;
+    if (hasRealVideo && videoRef.current) {
+      if (isPlaying && !theaterOpen && !prefersReducedMotion) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+      return;
+    }
+    if (!isPlaying) return;
     const timer = window.setInterval(() => {
       setElapsedSec((prev) => {
-        if (prev + 1 >= activeChapter.durationSec) {
+        if (prev + 1 >= effectiveDurationSec) {
           setChapterIndex((c) => (c + 1) % VIDEO_CHAPTERS.length);
           return 0;
         }
@@ -61,7 +90,24 @@ export const MediaShowreelSection: React.FC = () => {
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [isPlaying, viewMode, activeChapter.durationSec]);
+  }, [
+    isPlaying,
+    viewMode,
+    hasRealVideo,
+    effectiveDurationSec,
+    theaterOpen,
+    prefersReducedMotion,
+    activeChapter.id,
+  ]);
+
+  useEffect(() => {
+    if (!theaterOpen || !hasRealVideo || !theaterVideoRef.current) return;
+    if (isPlaying && !prefersReducedMotion) {
+      theaterVideoRef.current.play().catch(() => {});
+    } else {
+      theaterVideoRef.current.pause();
+    }
+  }, [theaterOpen, isPlaying, hasRealVideo, prefersReducedMotion, activeChapter.id]);
 
   const selectChapter = (idx: number) => {
     setChapterIndex(idx);
@@ -81,7 +127,7 @@ export const MediaShowreelSection: React.FC = () => {
 
   const progressPct = Math.min(
     100,
-    (elapsedSec / activeChapter.durationSec) * 100
+    effectiveDurationSec > 0 ? (elapsedSec / effectiveDurationSec) * 100 : 0
   );
 
   return (
@@ -169,16 +215,61 @@ export const MediaShowreelSection: React.FC = () => {
                   isPlaying ? '' : 'animate-ken-burns-paused'
                 }`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+              {hasRealVideo && activeChapter.videoUrl && (
+                <video
+                  ref={videoRef}
+                  key={activeChapter.id}
+                  src={activeChapter.videoUrl}
+                  poster={activeChapter.frames[0].image}
+                  muted
+                  playsInline
+                  autoPlay={isPlaying && !prefersReducedMotion}
+                  preload="metadata"
+                  onLoadedMetadata={(e) => {
+                    const dur = e.currentTarget.duration;
+                    if (Number.isFinite(dur) && dur > 0) {
+                      setVideoDurationSec(dur);
+                    }
+                  }}
+                  onTimeUpdate={(e) => {
+                    setElapsedSec(e.currentTarget.currentTime);
+                  }}
+                  onEnded={() => {
+                    setChapterIndex((c) => (c + 1) % VIDEO_CHAPTERS.length);
+                    setElapsedSec(0);
+                  }}
+                  onError={() =>
+                    setVideoFailed((prev) => ({
+                      ...prev,
+                      [activeChapter.id]: true,
+                    }))
+                  }
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent pointer-events-none" />
 
-              <button
-                type="button"
-                onClick={() => setTheaterOpen(true)}
-                aria-label="Fullscreen theater view"
-                className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md cursor-pointer"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </button>
+              <div className="absolute top-4 right-4 flex items-center gap-2">
+                {activeChapter.videoUrl && (
+                  <a
+                    href={activeChapter.videoUrl}
+                    download={`kelvix-${activeChapter.id}.mp4`}
+                    aria-label={`Download ${activeChapter.title} MP4 video`}
+                    className="min-h-[44px] px-3.5 flex items-center gap-1.5 rounded-full bg-black/55 hover:bg-black/85 text-white text-xs font-semibold backdrop-blur-md border border-white/15 cursor-pointer transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Download MP4</span>
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setTheaterOpen(true)}
+                  aria-label="Fullscreen theater view"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/55 hover:bg-black/85 text-white backdrop-blur-md border border-white/15 cursor-pointer"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
                 <p className="text-xs text-neutral-300 mb-1">
@@ -192,8 +283,8 @@ export const MediaShowreelSection: React.FC = () => {
                   role="slider"
                   aria-label="Film timeline"
                   aria-valuemin={0}
-                  aria-valuemax={activeChapter.durationSec}
-                  aria-valuenow={elapsedSec}
+                  aria-valuemax={Math.round(effectiveDurationSec)}
+                  aria-valuenow={Math.round(elapsedSec)}
                   tabIndex={0}
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -201,12 +292,16 @@ export const MediaShowreelSection: React.FC = () => {
                       0,
                       Math.min(1, (e.clientX - rect.left) / rect.width)
                     );
-                    setElapsedSec(Math.floor(ratio * activeChapter.durationSec));
+                    const nextSec = ratio * effectiveDurationSec;
+                    setElapsedSec(nextSec);
+                    if (videoRef.current) {
+                      videoRef.current.currentTime = nextSec;
+                    }
                   }}
                   className="w-full h-1.5 bg-white/25 rounded-full overflow-hidden cursor-pointer mb-4"
                 >
                   <div
-                    className="h-full bg-white transition-[width] duration-300"
+                    className="h-full bg-white transition-[width] duration-200"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -252,7 +347,7 @@ export const MediaShowreelSection: React.FC = () => {
                     </button>
                   </div>
                   <span dir="ltr" className="font-mono text-xs text-neutral-300 tabular-nums">
-                    {formatTime(elapsedSec)} / {activeChapter.durationFormatted}
+                    {formatTime(elapsedSec)} / {formatTime(effectiveDurationSec)}
                   </span>
                 </div>
               </div>
@@ -323,6 +418,18 @@ export const MediaShowreelSection: React.FC = () => {
                   isPlaying ? '' : 'animate-ken-burns-paused'
                 }`}
               />
+              {hasRealVideo && activeChapter.videoUrl && (
+                <video
+                  ref={theaterVideoRef}
+                  src={activeChapter.videoUrl}
+                  poster={activeChapter.frames[0].image}
+                  controls
+                  autoPlay={isPlaying && !prefersReducedMotion}
+                  playsInline
+                  loop
+                  className="absolute inset-0 w-full h-full object-cover bg-black"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -355,11 +462,21 @@ export const MediaShowreelSection: React.FC = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="px-5 py-4 flex items-center justify-between">
-              <h3 className="font-display text-base font-semibold text-white">
-                {lightboxImage.title}
-              </h3>
-              <span className="text-xs text-neutral-400">{lightboxImage.meta}</span>
+            <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="font-display text-base font-semibold text-white">
+                  {lightboxImage.title}
+                </h3>
+                <span className="text-xs text-neutral-400">{lightboxImage.meta}</span>
+              </div>
+              <a
+                href={lightboxImage.image}
+                download={`kelvix-${lightboxImage.id}.jpg`}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#1D72B8] hover:bg-[#D49A4A] hover:text-[#0E2233] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download Photo</span>
+              </a>
             </div>
           </div>
         </div>

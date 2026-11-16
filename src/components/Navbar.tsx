@@ -727,7 +727,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'Theme: Midnight Professional (Switch to Classic Light)'
                   : 'Theme: Classic Light (Switch to Midnight Professional)'
               }
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] text-sm font-semibold text-[#132C40] dark:text-slate-100 min-h-[38px] cursor-pointer transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#132C40] hover:bg-slate-100 dark:hover:bg-[#193A54] text-sm font-semibold text-[#132C40] dark:text-slate-100 min-h-[38px] cursor-pointer transition-all duration-200 active:scale-95 whitespace-nowrap shrink-0"
             >
               {theme === 'dark' ? (
                 <>
@@ -791,7 +791,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="text-left px-3.5 py-2.5 text-sm font-medium rounded-lg min-h-[44px] bg-slate-100 dark:bg-[#132C40] text-[#132C40] dark:text-slate-100 flex items-center gap-2"
+                className="text-left px-3.5 py-2.5 text-sm font-medium rounded-lg min-h-[44px] bg-slate-100 dark:bg-[#132C40] text-[#132C40] dark:text-slate-100 flex items-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer"
               >
                 {theme === 'dark' ? (
                   <>
