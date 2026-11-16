@@ -211,8 +211,12 @@ export const MediaShowreelSection: React.FC = () => {
                 key={`${activeChapter.id}-${frameIndex}`}
                 src={activeFrame.image}
                 alt={activeChapter.title}
-                className={`w-full h-full object-cover transition-opacity duration-700 animate-ken-burns ${
-                  isPlaying ? '' : 'animate-ken-burns-paused'
+                className={`w-full h-full object-cover transition-opacity duration-700 ${
+                  !hasRealVideo
+                    ? isPlaying
+                      ? 'animate-ken-burns'
+                      : 'animate-ken-burns animate-ken-burns-paused'
+                    : ''
                 }`}
               />
               {hasRealVideo && activeChapter.videoUrl && (

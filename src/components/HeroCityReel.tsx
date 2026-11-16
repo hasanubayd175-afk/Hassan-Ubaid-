@@ -1,12 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin, Pause, Play } from 'lucide-react';
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from 'motion/react';
-import { HERO_VIDEOS, IMAGES } from '../data/kelvisData';
+import { useReducedMotion } from 'motion/react';
+import { IMAGES } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { RegionId } from '../types/kelvis';
 import { ResilientImage } from './ResilientImage';
@@ -17,7 +12,6 @@ interface ReelClip {
   label: string;
   subtitle: string;
   image: string;
-  videoUrl: string;
 }
 
 const HERO_CLIPS: ReelClip[] = [
@@ -27,7 +21,6 @@ const HERO_CLIPS: ReelClip[] = [
     label: 'London',
     subtitle: 'City of London & Bishopsgate Hub',
     image: IMAGES.londonHub,
-    videoUrl: HERO_VIDEOS.london,
   },
   {
     id: 'germany',
@@ -35,7 +28,6 @@ const HERO_CLIPS: ReelClip[] = [
     label: 'Germany',
     subtitle: 'Frankfurt Financial District & Munich',
     image: IMAGES.germanyHub,
-    videoUrl: HERO_VIDEOS.germany,
   },
   {
     id: 'dubai',
@@ -43,11 +35,10 @@ const HERO_CLIPS: ReelClip[] = [
     label: 'Dubai',
     subtitle: 'Downtown Dubai & Boulevard Plaza',
     image: IMAGES.dubaiHub,
-    videoUrl: HERO_VIDEOS.dubai,
   },
 ];
 
-const CLIP_DURATION_MS = 4500;
+const CLIP_DURATION_MS = 6500;
 
 interface HeroCityReelProps {
   onSelectRegion?: (regionId: RegionId) => void;
@@ -60,16 +51,7 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
 }) => {
   const [clipIndex, setClipIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [videoFailed, setVideoFailed] = useState<Record<string, boolean>>({});
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const heroRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
-  const backdropY = useTransform(scrollYProgress, [0, 1], ['0%', '14%']);
-  const backdropScale = useTransform(scrollYProgress, [0, 1], [1, 1.06]);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -79,18 +61,6 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
     }, CLIP_DURATION_MS);
     return () => window.clearInterval(timer);
   }, [isPlaying]);
-
-  useEffect(() => {
-    HERO_CLIPS.forEach((_, idx) => {
-      const vid = videoRefs.current[idx];
-      if (!vid) return;
-      if (idx === clipIndex && isPlaying && !prefersReducedMotion) {
-        vid.play().catch(() => {});
-      } else {
-        vid.pause();
-      }
-    });
-  }, [clipIndex, isPlaying, prefersReducedMotion]);
 
   const activeClip = HERO_CLIPS[clipIndex];
 
@@ -115,22 +85,15 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
 
   return (
     <section
-      ref={heroRef}
       className="relative bg-[#0B1926] text-white overflow-hidden min-h-[500px] md:min-h-[560px] flex flex-col justify-between"
     >
-      {/* Full-Section Moving Multi-City Video Backdrop with Scroll Parallax */}
-      <motion.div
+      {/* Full-Section GPU-Stabilized Multi-City Backdrop */}
+      <div
         aria-hidden="true"
-        style={
-          prefersReducedMotion
-            ? undefined
-            : { y: backdropY, scale: backdropScale }
-        }
-        className="absolute inset-0 z-0 overflow-hidden will-change-transform"
+        className="absolute inset-0 z-0 overflow-hidden"
       >
         {HERO_CLIPS.map((clip, idx) => {
           const isCurrent = idx === clipIndex;
-          const showVideo = !prefersReducedMotion && !videoFailed[clip.id];
           return (
             <div
               key={clip.id}
@@ -142,35 +105,22 @@ export const HeroCityReel: React.FC<HeroCityReelProps> = ({
                 src={clip.image}
                 alt={`${clip.city} — ${clip.subtitle}`}
                 priority={idx === 0}
-                className={`w-full h-full object-cover animate-ken-burns ${
-                  isPlaying ? '' : 'animate-ken-burns-paused'
+                className={`w-full h-full object-cover ${
+                  !prefersReducedMotion
+                    ? isPlaying
+                      ? 'animate-ken-burns'
+                      : 'animate-ken-burns animate-ken-burns-paused'
+                    : ''
                 }`}
               />
-              {showVideo && (
-                <video
-                  ref={(el) => {
-                    videoRefs.current[idx] = el;
-                  }}
-                  src={clip.videoUrl}
-                  poster={clip.image}
-                  muted
-                  loop
-                  playsInline
-                  preload={idx === 0 ? 'auto' : 'metadata'}
-                  onError={() =>
-                    setVideoFailed((prev) => ({ ...prev, [clip.id]: true }))
-                  }
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              )}
             </div>
           );
         })}
 
-        {/* Measured Contrast Scrim keeping whole-section video vividly visible */}
+        {/* Measured Contrast Scrim keeping whole-section backdrop vividly visible */}
         <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#07111C]/88 via-[#0B1926]/55 to-[#0B1926]/25" />
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#07111C]/80 via-transparent to-[#07111C]/35" />
-      </motion.div>
+      </div>
 
       {/* Main Hero Content Slot */}
       <div className="relative z-30 flex-1 flex items-center py-14 md:py-18">

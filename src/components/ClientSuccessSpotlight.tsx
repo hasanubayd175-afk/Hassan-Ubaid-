@@ -248,26 +248,34 @@ export const ClientSuccessSpotlight: React.FC<ClientSuccessSpotlightProps> = ({
           {/* Left 7 Cols: Featured Testimonial Reel Player */}
           <div className="lg:col-span-7 flex flex-col rounded-2xl overflow-hidden bg-white/8 backdrop-blur-md border border-white/15 shadow-2xl">
             <div className="relative aspect-[16/9] bg-[#07111C] overflow-hidden">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${activeClip.id}-${frameIndex}`}
-                  initial={prefersReducedMotion ? false : { opacity: 0.25 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0.25 }}
-                  transition={{ duration: 0.55 }}
-                  className="w-full h-full"
-                >
-                  <ResilientImage
-                    src={activeFrame.image}
-                    alt={`${activeClip.partnerName} — ${activeClip.clipTitle}`}
-                    className={`w-full h-full object-cover animate-ken-burns ${
-                      isPlaying && !prefersReducedMotion
-                        ? ''
-                        : 'animate-ken-burns-paused'
-                    }`}
-                  />
-                </motion.div>
-              </AnimatePresence>
+              {!hasRealVideo ? (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${activeClip.id}-${frameIndex}`}
+                    initial={prefersReducedMotion ? false : { opacity: 0.25 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0.25 }}
+                    transition={{ duration: 0.55 }}
+                    className="w-full h-full"
+                  >
+                    <ResilientImage
+                      src={activeFrame.image}
+                      alt={`${activeClip.partnerName} — ${activeClip.clipTitle}`}
+                      className={`w-full h-full object-cover animate-ken-burns ${
+                        isPlaying && !prefersReducedMotion
+                          ? ''
+                          : 'animate-ken-burns-paused'
+                      }`}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              ) : (
+                <ResilientImage
+                  src={activeClip.frames[0].image}
+                  alt={`${activeClip.partnerName} — ${activeClip.clipTitle}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
               {hasRealVideo && activeClip.videoUrl && (
                 <video
                   ref={videoRef}

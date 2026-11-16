@@ -8,7 +8,8 @@ function isInsideScrollableContainer(node: HTMLElement | null): boolean {
     if (
       current.hasAttribute('data-lenis-prevent') ||
       current.getAttribute('role') === 'dialog' ||
-      current.classList.contains('gm-style')
+      current.classList.contains('gm-style') ||
+      current.classList.contains('leaflet-container')
     ) {
       return true;
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   AdvancedMarker,
   APIProvider,
@@ -10,6 +10,8 @@ import {
   useApiLoadingStatus,
   useMap,
 } from '@vis.gl/react-google-maps';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { ExternalLink, MapPin } from 'lucide-react';
 import { OFFICES } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -21,6 +23,354 @@ interface GlobalOfficesMapProps {
   onSelectRegion: (regionId: RegionId) => void;
   onBookInRegion: (regionId: RegionId) => void;
 }
+
+function useIsDarkTheme(): boolean {
+  const [isDark, setIsDark] = useState<boolean>(() =>
+    typeof document !== 'undefined'
+      ? document.documentElement.classList.contains('dark')
+      : false
+  );
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains('dark'));
+    sync();
+
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
+function createPinMarkerIcon(office: OfficeLocation, isSelected: boolean): L.DivIcon {
+  const fill = isSelected ? '#D49A4A' : '#132C40';
+  const stroke = isSelected ? '#FFFFFF' : '#2E96D8';
+  const scale = isSelected ? 1.16 : 0.96;
+  const width = Math.round(34 * scale);
+  const height = Math.round(44 * scale);
+
+  const wrapper = document.createElement('div');
+  wrapper.style.width = `${width}px`;
+  wrapper.style.height = `${height}px`;
+  wrapper.style.display = 'flex';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.justifyContent = 'center';
+  wrapper.style.filter = isSelected
+    ? 'drop-shadow(0 6px 12px rgba(14, 34, 51, 0.45))'
+    : 'drop-shadow(0 3px 6px rgba(14, 34, 51, 0.35))';
+  wrapper.style.cursor = 'pointer';
+
+  wrapper.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 46" width="${width}" height="${height}" aria-hidden="true">
+      <path d="M18 1.5C8.887 1.5 1.5 8.887 1.5 18c0 11.42 13.78 24.48 15.65 26.2a1.25 1.25 0 0 0 1.7 0C20.72 42.48 34.5 29.42 34.5 18 34.5 8.887 27.113 1.5 18 1.5Z" fill="${fill}" stroke="${stroke}" stroke-width="2.4"/>
+      <circle cx="18" cy="17.5" r="7.5" fill="#FFFFFF" fill-opacity="0.18"/>
+      <text x="18" y="20.5" text-anchor="middle" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, monospace" font-size="8.2" font-weight="700">${office.hubCode}</text>
+    </svg>
+  `;
+
+  return L.divIcon({
+    html: wrapper,
+    className: 'kelvix-leaflet-pin',
+    iconSize: [width, height],
+    iconAnchor: [Math.round(width / 2), height],
+    popupAnchor: [0, -height + 6],
+  });
+}
+
+function buildPopupContent(
+  office: OfficeLocation,
+  bookLabel: string,
+  onBook: (id: RegionId) => void
+): HTMLElement {
+  const container = document.createElement('div');
+  container.style.minWidth = '210px';
+  container.style.maxWidth = '250px';
+  container.style.padding = '2px';
+  container.style.color = '#0f172a';
+  container.style.fontFamily = 'DM Sans, ui-sans-serif, system-ui, sans-serif';
+
+  const title = document.createElement('p');
+  title.textContent = `Kelvix Solutions · ${office.city}`;
+  title.style.fontSize = '12px';
+  title.style.fontWeight = '700';
+  title.style.color = '#132C40';
+  title.style.margin = '0 0 3px 0';
+  container.appendChild(title);
+
+  const addr1 = document.createElement('p');
+  addr1.textContent = office.addressLine1;
+  addr1.style.fontSize = '12px';
+  addr1.style.color = '#475569';
+  addr1.style.margin = '0';
+  container.appendChild(addr1);
+
+  const addr2 = document.createElement('p');
+  addr2.textContent = office.addressLine2;
+  addr2.style.fontSize = '12px';
+  addr2.style.color = '#475569';
+  addr2.style.margin = '0 0 8px 0';
+  container.appendChild(addr2);
+
+  const footer = document.createElement('div');
+  footer.style.display = 'flex';
+  footer.style.alignItems = 'center';
+  footer.style.justifyContent = 'space-between';
+  footer.style.gap = '8px';
+  footer.style.paddingTop = '6px';
+  footer.style.borderTop = '1px solid #e2e8f0';
+
+  const phone = document.createElement('span');
+  phone.dir = 'ltr';
+  phone.textContent = office.phone;
+  phone.style.fontFamily = 'JetBrains Mono, ui-monospace, monospace';
+  phone.style.fontSize = '11px';
+  phone.style.color = '#334155';
+  footer.appendChild(phone);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = bookLabel;
+  btn.style.padding = '4px 10px';
+  btn.style.fontSize = '11px';
+  btn.style.fontWeight = '600';
+  btn.style.backgroundColor = '#132C40';
+  btn.style.color = '#ffffff';
+  btn.style.borderRadius = '6px';
+  btn.style.border = 'none';
+  btn.style.cursor = 'pointer';
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    onBook(office.id);
+  });
+  footer.appendChild(btn);
+
+  container.appendChild(footer);
+  return container;
+}
+
+const InteractiveLeafletHubMap: React.FC<{
+  selectedRegionId: RegionId;
+  viewAll: boolean;
+  openInfoId: RegionId | null;
+  onSelectHub: (id: RegionId) => void;
+  onCloseInfo: (id: RegionId) => void;
+  onBookHub: (id: RegionId) => void;
+  openMapsLabel: string;
+  allHubsLabel: string;
+  activeRegionLabel: string;
+  bookLabel: string;
+}> = ({
+  selectedRegionId,
+  viewAll,
+  openInfoId,
+  onSelectHub,
+  onCloseInfo,
+  onBookHub,
+  openMapsLabel,
+  allHubsLabel,
+  activeRegionLabel,
+  bookLabel,
+}) => {
+  const isDark = useIsDarkTheme();
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const markersRef = useRef<Record<RegionId, L.Marker> | null>(null);
+
+  const onSelectHubRef = useRef(onSelectHub);
+  const onCloseInfoRef = useRef(onCloseInfo);
+  const onBookHubRef = useRef(onBookHub);
+  onSelectHubRef.current = onSelectHub;
+  onCloseInfoRef.current = onCloseInfo;
+  onBookHubRef.current = onBookHub;
+
+  const activeOffice =
+    OFFICES.find((o) => o.id === selectedRegionId) || OFFICES[0];
+  const externalMapsUrl = `https://www.google.com/maps/search/?api=1&query=${activeOffice.lat},${activeOffice.lng}`;
+
+  // Initialize Leaflet map instance once
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container || mapInstanceRef.current) return;
+
+    const map = L.map(container, {
+      center: [activeOffice.lat, activeOffice.lng],
+      zoom: 12,
+      zoomControl: false,
+      scrollWheelZoom: false,
+      attributionControl: true,
+    });
+
+    map.attributionControl.setPrefix(false);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    const createdMarkers = {} as Record<RegionId, L.Marker>;
+    OFFICES.forEach((office) => {
+      const marker = L.marker([office.lat, office.lng], {
+        icon: createPinMarkerIcon(office, !viewAll && office.id === selectedRegionId),
+        title: `Kelvix Solutions — ${office.city}`,
+        zIndexOffset: !viewAll && office.id === selectedRegionId ? 500 : 100,
+      }).addTo(map);
+
+      marker.bindPopup(
+        buildPopupContent(office, bookLabel, (id) => onBookHubRef.current(id)),
+        { maxWidth: 260, closeButton: true }
+      );
+
+      marker.on('click', () => {
+        onSelectHubRef.current(office.id);
+      });
+
+      marker.on('popupclose', () => {
+        onCloseInfoRef.current(office.id);
+      });
+
+      createdMarkers[office.id] = marker;
+    });
+
+    mapInstanceRef.current = map;
+    markersRef.current = createdMarkers;
+
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(() => {
+            map.invalidateSize({ animate: false });
+          })
+        : null;
+    resizeObserver?.observe(container);
+
+    // Ensure crisp tile layout immediately after paint
+    const rafId = requestAnimationFrame(() => {
+      map.invalidateSize({ animate: false });
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObserver?.disconnect();
+      map.remove();
+      mapInstanceRef.current = null;
+      tileLayerRef.current = null;
+      markersRef.current = null;
+    };
+  }, []);
+
+  // Sync CARTO light/dark basemap tiles with OSM fallback
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
+    }
+
+    const cartoUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+    let errorCount = 0;
+    let switchedToOsm = false;
+
+    const layer = L.tileLayer(cartoUrl, {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OSM</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
+    });
+
+    layer.on('tileerror', () => {
+      errorCount += 1;
+      if (!switchedToOsm && errorCount >= 3 && mapInstanceRef.current === map) {
+        switchedToOsm = true;
+        layer.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+      }
+    });
+
+    layer.addTo(map);
+    tileLayerRef.current = layer;
+  }, [isDark]);
+
+  // Keep marker icons, localized popup copy, and viewport synced
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const markers = markersRef.current;
+    if (!map || !markers) return;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    OFFICES.forEach((office) => {
+      const marker = markers[office.id];
+      if (!marker) return;
+      const isSelected = viewAll || selectedRegionId === office.id;
+      marker.setIcon(createPinMarkerIcon(office, isSelected));
+      marker.setZIndexOffset(isSelected ? 500 : 100);
+      marker.setPopupContent(
+        buildPopupContent(office, bookLabel, (id) => onBookHubRef.current(id))
+      );
+
+      if (!viewAll && openInfoId === office.id) {
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+      } else if (marker.isPopupOpen()) {
+        marker.closePopup();
+      }
+    });
+
+    if (viewAll) {
+      const bounds = L.latLngBounds(
+        OFFICES.map((o) => [o.lat, o.lng] as [number, number])
+      );
+      map.fitBounds(bounds, {
+        padding: [52, 46],
+        maxZoom: 6,
+        animate: !prefersReducedMotion,
+      });
+      return;
+    }
+
+    const target = OFFICES.find((o) => o.id === selectedRegionId) || OFFICES[0];
+    if (prefersReducedMotion) {
+      map.setView([target.lat, target.lng], 12, { animate: false });
+    } else {
+      map.flyTo([target.lat, target.lng], 12, { duration: 0.75 });
+    }
+  }, [selectedRegionId, viewAll, openInfoId, bookLabel]);
+
+  return (
+    <div
+      data-lenis-prevent
+      className="flex-1 min-h-[380px] sm:min-h-[420px] w-full relative isolate z-0 bg-[#E5ECF4] dark:bg-[#0B1926]"
+    >
+      <div
+        ref={mapContainerRef}
+        dir="ltr"
+        aria-label={`Interactive regional headquarters map — ${viewAll ? allHubsLabel : activeOffice.city}`}
+        className="w-full h-full min-h-[380px] sm:min-h-[420px]"
+      />
+
+      <a
+        href={externalMapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute top-3 left-3 z-[450] inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/95 hover:bg-[#132C40] text-[#132C40] hover:text-white border border-slate-200 shadow-sm text-xs font-semibold transition-colors"
+      >
+        <span>{openMapsLabel}</span>
+        <ExternalLink className="w-3 h-3 shrink-0" />
+      </a>
+
+      <div className="hidden sm:flex absolute bottom-3 left-3 z-[450] items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/95 border border-slate-200 shadow-sm text-xs font-semibold text-[#132C40] pointer-events-none">
+        <MapPin className="w-3.5 h-3.5 text-[#1D72B8] shrink-0" aria-hidden="true" />
+        <span>{viewAll ? allHubsLabel : activeRegionLabel}</span>
+      </div>
+    </div>
+  );
+};
 
 const OfficeMarker: React.FC<{
   office: OfficeLocation;
@@ -108,107 +458,13 @@ const MapViewportController: React.FC<{
   return null;
 };
 
-const FallbackHubCanvas: React.FC<{
-  activeOffice: OfficeLocation;
-  viewAll: boolean;
-  onSelectHub: (id: RegionId) => void;
-  onBookHub: (id: RegionId) => void;
-  openMapsLabel: string;
-  bookLabel: string;
-}> = ({
-  activeOffice,
-  viewAll,
-  onSelectHub,
-  onBookHub,
-  openMapsLabel,
-  bookLabel,
-}) => {
-  const externalMapsUrl = `https://www.google.com/maps/search/?api=1&query=${activeOffice.lat},${activeOffice.lng}`;
-
-  return (
-    <div className="flex-1 min-h-[380px] sm:min-h-[420px] w-full flex flex-col justify-between bg-[#0B1926] text-slate-200 p-5 sm:p-6">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#D49A4A]">
-          <MapPin className="w-4 h-4 shrink-0" aria-hidden="true" />
-          <span>{viewAll ? 'London · Germany · Dubai' : activeOffice.city}</span>
-        </div>
-        <a
-          href={externalMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-[#1D72B8] text-white text-xs font-semibold transition-colors"
-        >
-          <span>{openMapsLabel}</span>
-          <ExternalLink className="w-3 h-3" />
-        </a>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
-        {OFFICES.map((office) => {
-          const isCurrent = !viewAll && office.id === activeOffice.id;
-          return (
-            <div
-              key={office.id}
-              onClick={() => onSelectHub(office.id)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSelectHub(office.id);
-                }
-              }}
-              className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                isCurrent
-                  ? 'bg-[#132C40] border-[#D49A4A]/70 shadow-lg'
-                  : 'bg-[#102336]/75 border-white/10 hover:border-[#2E96D8]/50'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="font-mono text-[11px] font-bold text-[#D49A4A]">
-                    {office.hubCode}
-                  </span>
-                  <span dir="ltr" className="font-mono text-[10px] text-slate-400 tabular-nums">
-                    {office.lat.toFixed(2)}°, {office.lng.toFixed(2)}°
-                  </span>
-                </div>
-                <p className="font-display text-sm font-bold text-white">
-                  {office.city}
-                </p>
-                <p className="text-[11px] text-slate-300 mt-1 leading-snug">
-                  {office.addressLine1}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBookHub(office.id);
-                }}
-                className="w-full py-1.5 rounded-lg bg-white/10 hover:bg-[#D49A4A] text-white hover:text-[#0E2233] text-[11px] font-semibold transition-colors cursor-pointer"
-              >
-                {bookLabel}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      <p className="text-[11px] text-slate-400">
-        {activeOffice.addressLine2} · {activeOffice.timezone}
-      </p>
-    </div>
-  );
-};
-
 const InnerMapCanvas: React.FC<{
   selectedRegionId: RegionId;
   viewAll: boolean;
   openInfoId: RegionId | null;
   quotaExceeded: boolean;
   setViewAll: (v: boolean) => void;
-  setOpenInfoId: (id: RegionId | null) => void;
+  setOpenInfoId: React.Dispatch<React.SetStateAction<RegionId | null>>;
   onSelectRegion: (regionId: RegionId) => void;
   onBookInRegion: (regionId: RegionId) => void;
 }> = ({
@@ -244,23 +500,29 @@ const InnerMapCanvas: React.FC<{
     status === APILoadingStatus.AUTH_FAILURE
   ) {
     return (
-      <FallbackHubCanvas
-        activeOffice={activeOffice}
+      <InteractiveLeafletHubMap
+        selectedRegionId={selectedRegionId}
         viewAll={viewAll}
+        openInfoId={openInfoId}
         onSelectHub={(id) => {
           setViewAll(false);
           onSelectRegion(id);
           setOpenInfoId(id);
         }}
+        onCloseInfo={(closedId) =>
+          setOpenInfoId((prev) => (prev === closedId ? null : prev))
+        }
         onBookHub={onBookInRegion}
         openMapsLabel={t.footer.openInMaps}
+        allHubsLabel={t.footer.allHubs}
+        activeRegionLabel={getRegionLabel(activeOffice)}
         bookLabel={t.clientsTeam.book}
       />
     );
   }
 
   return (
-    <div className="flex-1 min-h-[380px] sm:min-h-[420px] w-full relative">
+    <div data-lenis-prevent className="flex-1 min-h-[380px] sm:min-h-[420px] w-full relative">
       <GoogleMap
         mapId="DEMO_MAP_ID"
         defaultCenter={{ lat: activeOffice.lat, lng: activeOffice.lng }}
@@ -325,7 +587,8 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
   const [quotaExceeded, setQuotaExceeded] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [openInfoId, setOpenInfoId] = useState<RegionId | null>(selectedRegionId);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [initialLanguage] = useState(language);
 
   useEffect(() => {
     setViewAll(false);
@@ -343,13 +606,33 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
       setKeyChecked(true);
       return;
     }
-    fetch('/api/maps-config')
-      .then((r) => (r.ok ? r.json() : null))
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 1200);
+
+    fetch('/api/maps-config', { signal: controller.signal })
+      .then((r) => {
+        const contentType = r.headers.get('content-type') || '';
+        if (!r.ok || !contentType.includes('application/json')) {
+          return null;
+        }
+        return r.json();
+      })
       .then((data) => {
-        if (data?.apiKey) setApiKey(data.apiKey);
+        if (data?.apiKey && typeof data.apiKey === 'string') {
+          setApiKey(data.apiKey);
+        }
       })
       .catch(() => {})
-      .finally(() => setKeyChecked(true));
+      .finally(() => {
+        window.clearTimeout(timeoutId);
+        setKeyChecked(true);
+      });
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [apiKey]);
 
   const activeOffice =
@@ -365,7 +648,7 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
   return (
     <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#102336] shadow-md flex flex-col h-full">
       {apiKey ? (
-        <APIProvider apiKey={apiKey} libraries={['marker']}>
+        <APIProvider apiKey={apiKey} libraries={['marker']} language={initialLanguage}>
           <InnerMapCanvas
             selectedRegionId={selectedRegionId}
             viewAll={viewAll}
@@ -378,16 +661,22 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
           />
         </APIProvider>
       ) : keyChecked ? (
-        <FallbackHubCanvas
-          activeOffice={activeOffice}
+        <InteractiveLeafletHubMap
+          selectedRegionId={selectedRegionId}
           viewAll={viewAll}
+          openInfoId={openInfoId}
           onSelectHub={(id) => {
             setViewAll(false);
             onSelectRegion(id);
             setOpenInfoId(id);
           }}
+          onCloseInfo={(closedId) =>
+            setOpenInfoId((prev) => (prev === closedId ? null : prev))
+          }
           onBookHub={onBookInRegion}
           openMapsLabel={t.footer.openInMaps}
+          allHubsLabel={t.footer.allHubs}
+          activeRegionLabel={getRegionLabel(activeOffice)}
           bookLabel={t.clientsTeam.book}
         />
       ) : (

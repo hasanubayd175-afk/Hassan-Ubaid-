@@ -126,19 +126,22 @@ html.theme-transitioning *::after {
 
 @keyframes kenBurnsSlow {
   0% {
-    transform: scale(1) translate3d(0, 0, 0);
+    transform: scale3d(1, 1, 1) translate3d(0, 0, 0) rotate(0.001deg);
   }
   50% {
-    transform: scale(1.05) translate3d(-0.8%, -0.6%, 0);
+    transform: scale3d(1.045, 1.045, 1) translate3d(-0.6%, -0.4%, 0) rotate(0.02deg);
   }
   100% {
-    transform: scale(1.02) translate3d(0.6%, 0.3%, 0);
+    transform: scale3d(1.02, 1.02, 1) translate3d(0.4%, 0.25%, 0) rotate(0.001deg);
   }
 }
 
 .animate-ken-burns {
-  animation: kenBurnsSlow 18s cubic-bezier(0.25, 0.1, 0.25, 1) infinite alternate;
+  animation: kenBurnsSlow 22s ease-in-out infinite alternate;
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .animate-ken-burns-paused {
