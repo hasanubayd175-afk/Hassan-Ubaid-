@@ -15,6 +15,14 @@ console.error = (...args: unknown[]) => {
     msg.includes('QuotaExceededError')
   ) {
     window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
+  } else if (
+    msg.includes('InvalidKeyMapError') ||
+    msg.includes('RefererNotAllowedMapError') ||
+    msg.includes('MissingKeyMapError') ||
+    msg.includes('ApiNotActivatedMapError') ||
+    msg.includes('ApiProjectMapError')
+  ) {
+    window.dispatchEvent(new CustomEvent('gmp-auth-error'));
   }
 };
 

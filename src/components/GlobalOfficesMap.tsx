@@ -257,7 +257,7 @@ const InteractiveLeafletHubMap: React.FC<{
     };
   }, []);
 
-  // Sync CARTO light/dark basemap tiles with OSM fallback
+  // Sync Esri World Street Map basemap (no API key required) with OSM fallback
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -267,18 +267,16 @@ const InteractiveLeafletHubMap: React.FC<{
       tileLayerRef.current = null;
     }
 
-    const cartoUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    const esriUrl =
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
 
     let errorCount = 0;
     let switchedToOsm = false;
 
-    const layer = L.tileLayer(cartoUrl, {
-      subdomains: 'abcd',
+    const layer = L.tileLayer(esriUrl, {
       maxZoom: 19,
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OSM</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',
+        'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
     });
 
     layer.on('tileerror', () => {
@@ -291,7 +289,7 @@ const InteractiveLeafletHubMap: React.FC<{
 
     layer.addTo(map);
     tileLayerRef.current = layer;
-  }, [isDark]);
+  }, []);
 
   // Keep marker icons, localized popup copy, and viewport synced
   useEffect(() => {
@@ -351,7 +349,11 @@ const InteractiveLeafletHubMap: React.FC<{
         ref={mapContainerRef}
         dir="ltr"
         aria-label={`Interactive regional headquarters map — ${viewAll ? allHubsLabel : activeOffice.city}`}
-        className="w-full h-full min-h-[380px] sm:min-h-[420px]"
+        className={`w-full h-full min-h-[380px] sm:min-h-[420px] ${
+          isDark
+            ? '[&_.leaflet-tile-pane]:[filter:invert(92%)_hue-rotate(180deg)_brightness(92%)_contrast(92%)]'
+            : ''
+        }`}
       />
 
       <a
@@ -572,18 +574,31 @@ const InnerMapCanvas: React.FC<{
   );
 };
 
+function sanitizeMapsApiKey(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (
+    !trimmed ||
+    trimmed.startsWith('MY_') ||
+    trimmed.startsWith('YOUR_') ||
+    trimmed.length < 20
+  ) {
+    return '';
+  }
+  return trimmed;
+}
+
 export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
   selectedRegionId,
   focusTrigger = 0,
   onSelectRegion,
   onBookInRegion,
 }) => {
-  const [apiKey, setApiKey] = useState<string>(
-    import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+  const initialEnvKey = sanitizeMapsApiKey(
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY
   );
-  const [keyChecked, setKeyChecked] = useState<boolean>(
-    Boolean(import.meta.env.VITE_GOOGLE_MAPS_API_KEY)
-  );
+  const [apiKey, setApiKey] = useState<string>(initialEnvKey);
+  const [keyChecked, setKeyChecked] = useState<boolean>(Boolean(initialEnvKey));
   const [quotaExceeded, setQuotaExceeded] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [openInfoId, setOpenInfoId] = useState<RegionId | null>(selectedRegionId);
@@ -596,9 +611,13 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
   }, [selectedRegionId, focusTrigger]);
 
   useEffect(() => {
-    const onQuotaError = () => setQuotaExceeded(true);
-    window.addEventListener('gmp-quota-exceeded', onQuotaError);
-    return () => window.removeEventListener('gmp-quota-exceeded', onQuotaError);
+    const onFallbackError = () => setQuotaExceeded(true);
+    window.addEventListener('gmp-quota-exceeded', onFallbackError);
+    window.addEventListener('gmp-auth-error', onFallbackError);
+    return () => {
+      window.removeEventListener('gmp-quota-exceeded', onFallbackError);
+      window.removeEventListener('gmp-auth-error', onFallbackError);
+    };
   }, []);
 
   useEffect(() => {
@@ -619,8 +638,9 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
         return r.json();
       })
       .then((data) => {
-        if (data?.apiKey && typeof data.apiKey === 'string') {
-          setApiKey(data.apiKey);
+        const cleanKey = sanitizeMapsApiKey(data?.apiKey);
+        if (cleanKey) {
+          setApiKey(cleanKey);
         }
       })
       .catch(() => {})
