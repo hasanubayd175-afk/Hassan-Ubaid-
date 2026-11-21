@@ -12,7 +12,7 @@ import {
 } from '@vis.gl/react-google-maps';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ExternalLink, MapPin } from 'lucide-react';
+import { ExternalLink, Loader2, MapPin, RefreshCw } from 'lucide-react';
 import { OFFICES } from '../data/kelvisData';
 import { useLanguage } from '../i18n/LanguageContext';
 import { OfficeLocation, RegionId } from '../types/kelvis';
@@ -151,6 +151,126 @@ function buildPopupContent(
   return container;
 }
 
+const MapLoadingSkeleton: React.FC<{
+  variant: 'loading' | 'delayed' | 'error';
+  title: string;
+  subtitle: string;
+  openMapsUrl: string;
+  openMapsLabel: string;
+  retryLabel: string;
+  overlay?: boolean;
+  visible?: boolean;
+  onRetry?: () => void;
+}> = ({
+  variant,
+  title,
+  subtitle,
+  openMapsUrl,
+  openMapsLabel,
+  retryLabel,
+  overlay = false,
+  visible = true,
+  onRetry,
+}) => {
+  const isInteractive = variant === 'delayed' || variant === 'error';
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy={variant !== 'error'}
+      aria-hidden={!visible}
+      className={`${
+        overlay
+          ? `absolute inset-0 z-[480] transition-opacity duration-300 ${
+              visible
+                ? 'opacity-100'
+                : 'opacity-0 pointer-events-none'
+            }`
+          : 'flex-1 min-h-[380px] sm:min-h-[420px] w-full relative'
+      } overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-[#0B1926] ${
+        !isInteractive && overlay ? 'pointer-events-none' : ''
+      }`}
+    >
+      {/* Subtle architectural map grid */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(19,44,64,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(19,44,64,0.06)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:36px_36px]"
+      />
+
+      {/* Shimmer road & district skeleton placeholders */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none animate-pulse motion-reduce:animate-none"
+      >
+        <div className="absolute top-[22%] left-[8%] w-36 h-3 rounded-full bg-slate-300/60 dark:bg-slate-700/45 -rotate-6" />
+        <div className="absolute top-[38%] right-[12%] w-44 h-2.5 rounded-full bg-slate-300/55 dark:bg-slate-700/40 rotate-12" />
+        <div className="absolute bottom-[28%] left-[18%] w-48 h-2.5 rounded-full bg-slate-300/50 dark:bg-slate-700/35 rotate-3" />
+        <div className="absolute top-[16%] right-[24%] w-20 h-14 rounded-lg bg-slate-200/75 dark:bg-slate-800/55" />
+        <div className="absolute bottom-[18%] right-[14%] w-28 h-12 rounded-lg bg-slate-200/75 dark:bg-slate-800/55" />
+
+        {/* Subtle placeholder hub pin beacons */}
+        <span className="absolute top-[30%] left-[26%] w-3 h-3 rounded-full bg-[#1D72B8]/35 ring-4 ring-[#1D72B8]/15" />
+        <span className="absolute top-[42%] right-[32%] w-3 h-3 rounded-full bg-[#D49A4A]/45 ring-4 ring-[#D49A4A]/15" />
+        <span className="absolute bottom-[32%] left-[44%] w-2.5 h-2.5 rounded-full bg-[#2E96D8]/35 ring-4 ring-[#2E96D8]/15" />
+
+        {/* Corner control skeletons matching live map controls */}
+        <div className="absolute top-3 left-3 w-28 h-7 rounded-lg bg-white/80 dark:bg-[#132C40]/80 border border-slate-200/70 dark:border-white/10" />
+        <div className="absolute top-3 right-3 w-8 h-16 rounded-lg bg-white/80 dark:bg-[#132C40]/80 border border-slate-200/70 dark:border-white/10" />
+        <div className="hidden sm:block absolute bottom-3 left-3 w-24 h-7 rounded-lg bg-white/80 dark:bg-[#132C40]/80 border border-slate-200/70 dark:border-white/10" />
+      </div>
+
+      {/* Centered frosted status card with subtle spinner */}
+      <div className="relative z-10 mx-4 max-w-xs w-full rounded-xl bg-white/92 dark:bg-[#102336]/92 backdrop-blur-md border border-slate-200/85 dark:border-white/12 shadow-lg px-5 py-4 text-center">
+        <div className="mx-auto mb-2.5 w-9 h-9 rounded-full bg-[#1D72B8]/10 dark:bg-[#D49A4A]/15 border border-[#1D72B8]/20 dark:border-[#D49A4A]/30 flex items-center justify-center">
+          {variant === 'error' ? (
+            <MapPin
+              className="w-4 h-4 text-[#D49A4A]"
+              aria-hidden="true"
+            />
+          ) : (
+            <Loader2
+              className="w-4 h-4 text-[#1D72B8] dark:text-[#D49A4A] animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          )}
+        </div>
+
+        <p className="font-display text-sm font-semibold text-[#132C40] dark:text-white leading-snug">
+          {title}
+        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 tabular-nums">
+          {subtitle}
+        </p>
+
+        {isInteractive && (
+          <div className="mt-3.5 pt-3 border-t border-slate-200/80 dark:border-white/10 flex flex-wrap items-center justify-center gap-2">
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#132C40] dark:bg-[#1D72B8] hover:bg-[#1D72B8] dark:hover:bg-[#2E96D8] text-white text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3 shrink-0" aria-hidden="true" />
+                <span>{retryLabel}</span>
+              </button>
+            )}
+            <a
+              href={openMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-[#132C40] dark:text-white text-xs font-semibold transition-colors"
+            >
+              <span>{openMapsLabel}</span>
+              <ExternalLink className="w-3 h-3 shrink-0" aria-hidden="true" />
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const InteractiveLeafletHubMap: React.FC<{
   selectedRegionId: RegionId;
   viewAll: boolean;
@@ -162,6 +282,9 @@ const InteractiveLeafletHubMap: React.FC<{
   allHubsLabel: string;
   activeRegionLabel: string;
   bookLabel: string;
+  loadingTitle: string;
+  unavailableTitle: string;
+  retryLabel: string;
 }> = ({
   selectedRegionId,
   viewAll,
@@ -173,8 +296,14 @@ const InteractiveLeafletHubMap: React.FC<{
   allHubsLabel,
   activeRegionLabel,
   bookLabel,
+  loadingTitle,
+  unavailableTitle,
+  retryLabel,
 }) => {
   const isDark = useIsDarkTheme();
+  const [tilesReady, setTilesReady] = useState(false);
+  const [tilesFailed, setTilesFailed] = useState(false);
+  const [tileRetryKey, setTileRetryKey] = useState(0);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -262,6 +391,9 @@ const InteractiveLeafletHubMap: React.FC<{
     const map = mapInstanceRef.current;
     if (!map) return;
 
+    setTilesReady(false);
+    setTilesFailed(false);
+
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
       tileLayerRef.current = null;
@@ -270,7 +402,9 @@ const InteractiveLeafletHubMap: React.FC<{
     const esriUrl =
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
 
-    let errorCount = 0;
+    let esriErrorCount = 0;
+    let osmErrorCount = 0;
+    let loadedTileCount = 0;
     let switchedToOsm = false;
 
     const layer = L.tileLayer(esriUrl, {
@@ -279,17 +413,46 @@ const InteractiveLeafletHubMap: React.FC<{
         'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
     });
 
+    layer.on('tileload', () => {
+      loadedTileCount += 1;
+      setTilesReady(true);
+      setTilesFailed(false);
+    });
+
+    layer.on('load', () => {
+      if (loadedTileCount > 0) {
+        setTilesReady(true);
+      }
+    });
+
     layer.on('tileerror', () => {
-      errorCount += 1;
-      if (!switchedToOsm && errorCount >= 3 && mapInstanceRef.current === map) {
-        switchedToOsm = true;
-        layer.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+      if (!switchedToOsm) {
+        esriErrorCount += 1;
+        if (esriErrorCount >= 3 && mapInstanceRef.current === map) {
+          switchedToOsm = true;
+          layer.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+        }
+      } else {
+        osmErrorCount += 1;
+        if (osmErrorCount >= 4 && loadedTileCount === 0) {
+          setTilesFailed(true);
+        }
       }
     });
 
     layer.addTo(map);
     tileLayerRef.current = layer;
-  }, []);
+
+    const safetyRevealTimer = window.setTimeout(() => {
+      if (loadedTileCount > 0) {
+        setTilesReady(true);
+      }
+    }, 2400);
+
+    return () => {
+      window.clearTimeout(safetyRevealTimer);
+    };
+  }, [tileRetryKey]);
 
   // Keep marker icons, localized popup copy, and viewport synced
   useEffect(() => {
@@ -354,6 +517,30 @@ const InteractiveLeafletHubMap: React.FC<{
             ? '[&_.leaflet-tile-pane]:[filter:invert(92%)_hue-rotate(180deg)_brightness(92%)_contrast(92%)]'
             : ''
         }`}
+      />
+
+      <MapLoadingSkeleton
+        overlay
+        visible={!tilesReady || tilesFailed}
+        variant={tilesFailed ? 'error' : 'loading'}
+        title={tilesFailed ? unavailableTitle : loadingTitle}
+        subtitle={
+          viewAll
+            ? 'London · Munich · Dubai'
+            : `${activeOffice.city} (${activeOffice.lat.toFixed(2)}°, ${activeOffice.lng.toFixed(2)}°)`
+        }
+        openMapsUrl={externalMapsUrl}
+        openMapsLabel={openMapsLabel}
+        retryLabel={retryLabel}
+        onRetry={
+          tilesFailed
+            ? () => {
+                setTilesFailed(false);
+                setTilesReady(false);
+                setTileRetryKey((n) => n + 1);
+              }
+            : undefined
+        }
       />
 
       <a
@@ -481,6 +668,39 @@ const InnerMapCanvas: React.FC<{
 }) => {
   const status = useApiLoadingStatus();
   const { t } = useLanguage();
+  const [tilesLoaded, setTilesLoaded] = useState(false);
+  const [initDelayed, setInitDelayed] = useState(false);
+  const [initTimedOut, setInitTimedOut] = useState(false);
+
+  const isScriptLoading =
+    status === APILoadingStatus.NOT_LOADED ||
+    status === APILoadingStatus.LOADING;
+
+  useEffect(() => {
+    if (!isScriptLoading) {
+      setInitDelayed(false);
+      return;
+    }
+
+    const delayTimer = window.setTimeout(() => setInitDelayed(true), 4500);
+    const timeoutTimer = window.setTimeout(() => setInitTimedOut(true), 9500);
+
+    return () => {
+      window.clearTimeout(delayTimer);
+      window.clearTimeout(timeoutTimer);
+    };
+  }, [isScriptLoading]);
+
+  useEffect(() => {
+    if (status !== APILoadingStatus.LOADED) {
+      setTilesLoaded(false);
+      return;
+    }
+
+    const safetyReveal = window.setTimeout(() => setTilesLoaded(true), 2800);
+    return () => window.clearTimeout(safetyReveal);
+  }, [status]);
+
   const targetOffice = viewAll
     ? null
     : OFFICES.find((o) => o.id === selectedRegionId) || OFFICES[0];
@@ -496,8 +716,13 @@ const InnerMapCanvas: React.FC<{
         ? t.regions.dubai
         : t.regions.london;
 
+  const mapSubtitle = viewAll
+    ? 'London · Munich · Dubai'
+    : `${activeOffice.city} (${activeOffice.lat.toFixed(2)}°, ${activeOffice.lng.toFixed(2)}°)`;
+
   if (
     quotaExceeded ||
+    initTimedOut ||
     status === APILoadingStatus.FAILED ||
     status === APILoadingStatus.AUTH_FAILURE
   ) {
@@ -519,6 +744,24 @@ const InnerMapCanvas: React.FC<{
         allHubsLabel={t.footer.allHubs}
         activeRegionLabel={getRegionLabel(activeOffice)}
         bookLabel={t.clientsTeam.book}
+        loadingTitle={t.footer.mapLoadingTitle}
+        unavailableTitle={t.footer.mapUnavailableTitle}
+        retryLabel={t.footer.mapRetry}
+      />
+    );
+  }
+
+  if (isScriptLoading) {
+    return (
+      <MapLoadingSkeleton
+        variant={initDelayed ? 'delayed' : 'loading'}
+        title={
+          initDelayed ? t.footer.mapInitializingDelayed : t.footer.mapLoadingTitle
+        }
+        subtitle={mapSubtitle}
+        openMapsUrl={externalMapsUrl}
+        openMapsLabel={t.footer.openInMaps}
+        retryLabel={t.footer.mapRetry}
       />
     );
   }
@@ -534,6 +777,7 @@ const InnerMapCanvas: React.FC<{
         streetViewControl={false}
         fullscreenControl={true}
         internalUsageAttributionIds={['gmp_mcp_codeassist_v1_aistudio']}
+        onTilesLoaded={() => setTilesLoaded(true)}
         style={{ width: '100%', height: '100%', minHeight: '380px' }}
       >
         <MapViewportController targetOffice={targetOffice} viewAll={viewAll} />
@@ -554,6 +798,17 @@ const InnerMapCanvas: React.FC<{
           />
         ))}
       </GoogleMap>
+
+      <MapLoadingSkeleton
+        overlay
+        visible={!tilesLoaded}
+        variant="loading"
+        title={t.footer.mapLoadingTitle}
+        subtitle={mapSubtitle}
+        openMapsUrl={externalMapsUrl}
+        openMapsLabel={t.footer.openInMaps}
+        retryLabel={t.footer.mapRetry}
+      />
 
       {/* Clean Non-Overlapping Corner Floating Controls */}
       <a
@@ -665,6 +920,8 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
         ? t.regions.dubai
         : t.regions.london;
 
+  const externalMapsUrl = `https://www.google.com/maps/search/?api=1&query=${activeOffice.lat},${activeOffice.lng}`;
+
   return (
     <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#102336] shadow-md flex flex-col h-full">
       {apiKey ? (
@@ -698,16 +955,19 @@ export const GlobalOfficesMap: React.FC<GlobalOfficesMapProps> = ({
           allHubsLabel={t.footer.allHubs}
           activeRegionLabel={getRegionLabel(activeOffice)}
           bookLabel={t.clientsTeam.book}
+          loadingTitle={t.footer.mapLoadingTitle}
+          unavailableTitle={t.footer.mapUnavailableTitle}
+          retryLabel={t.footer.mapRetry}
         />
       ) : (
-        <div className="flex-1 min-h-[380px] sm:min-h-[420px] w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0B1724] text-slate-600 dark:text-slate-300 px-6 text-center">
-          <p className="font-display text-sm font-semibold text-[#132C40] dark:text-white mb-1">
-            Loading Global Hub Map...
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            London (51.51°N) · Munich (48.14°N) · Dubai (25.20°N)
-          </p>
-        </div>
+        <MapLoadingSkeleton
+          variant="loading"
+          title={t.footer.mapLoadingTitle}
+          subtitle="London · Munich · Dubai"
+          openMapsUrl={externalMapsUrl}
+          openMapsLabel={t.footer.openInMaps}
+          retryLabel={t.footer.mapRetry}
+        />
       )}
 
       {/* Clean Localized Pin Focus Bar */}

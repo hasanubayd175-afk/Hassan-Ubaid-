@@ -304,6 +304,10 @@ export interface TranslationPack {
     newsletterInvalid: string;
     pinFocus: string;
     allHubs: string;
+    mapLoadingTitle: string;
+    mapInitializingDelayed: string;
+    mapUnavailableTitle: string;
+    mapRetry: string;
   };
   widget: {
     aiChat: string;
@@ -718,6 +722,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       newsletterInvalid: 'Please enter a valid email address.',
       pinFocus: 'Pin Focus',
       allHubs: 'All Hubs',
+      mapLoadingTitle: 'Loading Dispatch Map',
+      mapInitializingDelayed: 'Connecting to map service...',
+      mapUnavailableTitle: 'Map Preview Unavailable',
+      mapRetry: 'Retry',
     },
     widget: {
       aiChat: 'Kelvix AI Chat',
@@ -1208,6 +1216,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       newsletterInvalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
       pinFocus: 'Standort-Fokus',
       allHubs: 'Alle Standorte',
+      mapLoadingTitle: 'Einsatzkarte wird geladen',
+      mapInitializingDelayed: 'Verbindung zum Kartendienst...',
+      mapUnavailableTitle: 'Kartenvorschau nicht verfügbar',
+      mapRetry: 'Erneut versuchen',
     },
     widget: {
       aiChat: 'Kelvix KI-Chat',
@@ -1698,6 +1710,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationPack> = {
       newsletterInvalid: 'يرجى إدخال بريد إلكتروني صحيح.',
       pinFocus: 'تركيز الموقع',
       allHubs: 'جميع المراكز',
+      mapLoadingTitle: 'جارٍ تحميل خريطة الانتشار',
+      mapInitializingDelayed: 'جارٍ الاتصال بخدمة الخرائط...',
+      mapUnavailableTitle: 'معاينة الخريطة غير متاحة حالياً',
+      mapRetry: 'إعادة المحاولة',
     },
     widget: {
       aiChat: 'مساعد كيلفكس الذكي',

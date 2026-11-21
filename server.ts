@@ -15,7 +15,10 @@ const ai = process.env.GEMINI_API_KEY
     })
   : null;
 
-const PORT = 3000;
+const PORT =
+  process.env.NODE_ENV === 'production'
+    ? Number(process.env.PORT) || 3000
+    : 3000;
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const STORE_PATH = path.join(DATA_DIR, 'store.json');
 
